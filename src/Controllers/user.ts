@@ -36,29 +36,35 @@ const login = async (req: Request, res: Response) => {
         });
     
         const userData = userResponse.data.data[0]; // 取得第一筆使用者資料
-        const accessToken = jwt.sign(userData, ACCESS_SECRET_KEY, {expiresIn: accessTime});
-        const refreshToken = jwt.sign(userData, REFRESH_SECRET_KEY, {expiresIn: refreshTime});
 
         const profile_image = userData.profile_image_url.split('https://static-cdn.jtvnw.net')[1];
         const user = new Users(undefined, userData.id, userData.login, userData.display_name, userData.email, profile_image);
         const result = await user.registry();
-        // console.log(result)
 
-        res.cookie('access', accessToken, {
-            httpOnly: true,
-            secure: true,
-            maxAge: 24*60*60*1000,
-            domain: cookieDomain,
-        })
-        res.cookie('refresh', refreshToken, {
-            httpOnly: true,
-            secure: true,
-            maxAge: 24*60*60*1000,
-            domain: cookieDomain,
-        })
-        res.redirect(`${domainEnv}:3000/check?id=${userData.id}`);
+        if (result.status) {
+            const accessToken = jwt.sign(result.userinfo[0], ACCESS_SECRET_KEY, {expiresIn: accessTime});
+            const refreshToken = jwt.sign(result.userinfo[0], REFRESH_SECRET_KEY, {expiresIn: refreshTime});
+    
+            res.cookie('access', accessToken, {
+                httpOnly: true,
+                secure: true,
+                maxAge: 24*60*60*1000,
+                domain: cookieDomain,
+            })
+            res.cookie('refresh', refreshToken, {
+                httpOnly: true,
+                secure: true,
+                maxAge: 24*60*60*1000,
+                domain: cookieDomain,
+            })
+            if (result.userinfo[0].isAdmin) {
+                res.redirect(`${domainEnv}:3000/back`);
+            } else {
+                res.redirect(`${domainEnv}:3000/check?id=${result.userinfo[0].id}`);
+            }
+        }
+
     } catch (e) {
-        console.log(e)
         res.status(500).send("登入失敗");
     }
 }

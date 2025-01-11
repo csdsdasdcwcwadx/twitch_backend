@@ -1,15 +1,15 @@
-import { MysqlError } from 'mysql';
 import db from '../migration';
-import { v4 as uuidv4 } from 'uuid';
 
-interface I_Checks {
-    id?: string;
-    passcode?: string;
+interface I_UserChecks {
+    user_id?: string;
+    check_id?: string;
+    checked?: boolean;
 }
+
 interface GetAllSuccessResponse {
     status: true;
     message: string;
-    checkinfo: I_Checks[];
+    usercheckinfo: I_UserChecks[];
 }
 
 interface GetAllErrorResponse {
@@ -19,32 +19,37 @@ interface GetAllErrorResponse {
 
 type GetAllResponse = GetAllSuccessResponse | GetAllErrorResponse;
 
-export class Checks implements I_Checks {
-    id?: string;
-    passcode?: string;
+export class UserChecks implements I_UserChecks {
+    user_id?: string;
+    check_id?: string;
+    checked?: boolean;
 
-    constructor (id?: string, passcode?: string) {
-        this.id = id;
-        this.passcode = passcode;
+    constructor (
+        user_id?: string,
+        check_id?: string,
+        checked?: boolean,
+    ) {
+        this.user_id = user_id;
+        this.check_id = check_id;
+        this.checked = checked;
     }
 
     registry() {
         return new Promise((resolve, reject) => {
-            const id = uuidv4().substring(0, 12);
-
-            const post: I_Checks = {
-                id,
-                passcode: this.passcode
+            const post: I_UserChecks = {
+                user_id: this.user_id,
+                check_id: this.check_id,
+                checked: this.checked,
             };
             const errorReturn = {
                 status: false,
-                message: '簽到表開放失敗',
+                message: '簽到失敗',
             };
             const successReturn = {
                 status: true,
-                message: '簽到表開放成功',
+                message: '簽到成功',
             };
-            const SQL = 'INSERT INTO Checks SET ?';
+            const SQL = 'INSERT INTO UserChecks SET ?';
             db.query(SQL, post, (err, _result) => {
                 if(err) reject(errorReturn);
                 else resolve(successReturn);
@@ -52,21 +57,21 @@ export class Checks implements I_Checks {
         })
     }
 
-    getall(): Promise<GetAllResponse> {
+    getUserChecks(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            const SQL = 'SELECT * FROM Checks';
+            const SQL = 'SELECT * FROM UserChecks WHERE user_id = ?';
             const errorReturn: GetAllErrorResponse = {
                 status: false,
-                message: '簽到表取得失敗',
+                message: '取得用戶簽到表失敗',
             };
 
-            db.query(SQL, (err: MysqlError, result: I_Checks[]) => {
+            db.query(SQL, this.user_id, (err, result: I_UserChecks[]) => {
                 if (err) reject(errorReturn);
                 else {
                     const successReturn: GetAllSuccessResponse = {
                         status: true,
-                        message: "取得簽到表成功",
-                        checkinfo: result,
+                        message: "取得用戶簽到表成功",
+                        usercheckinfo: result,
                     }
                     resolve(successReturn);
                 }

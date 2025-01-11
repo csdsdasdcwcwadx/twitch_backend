@@ -1,14 +1,28 @@
 import db from '../migration';
 import { v4 as uuidv4 } from 'uuid';
 
-export interface I_Users {
+interface I_Users {
     id?: string;
     twitch_id?: string;
     login?: string;
     name?: string;
     email?: string;
     profile_image?: string;
+    isAdmin?: boolean;
 }
+
+interface GetAllSuccessResponse {
+    status: true;
+    message: string;
+    userinfo: I_Users[];
+}
+
+interface GetAllErrorResponse {
+    status: false;
+    message: string;
+}
+
+type GetAllResponse = GetAllSuccessResponse | GetAllErrorResponse;
 
 export class Users implements I_Users {
     id?: string;
@@ -17,6 +31,7 @@ export class Users implements I_Users {
     name?: string;
     email?: string;
     profile_image?: string;
+    isAdmin?: boolean;
 
     constructor(
         id?: string,
@@ -25,6 +40,7 @@ export class Users implements I_Users {
         name?: string,
         email?: string,
         profile_image?: string,
+        isAdmin?: boolean,
     ) {
         this.id = id;
         this.twitch_id = twitch_id;
@@ -32,9 +48,10 @@ export class Users implements I_Users {
         this.name = name;
         this.email = email;
         this.profile_image = profile_image;
+        this.isAdmin = isAdmin;
     }
 
-    registry() {
+    registry(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
             const id = uuidv4().substring(0, 12);
             const post: I_Users = {
@@ -44,6 +61,7 @@ export class Users implements I_Users {
                 name: this.name,
                 email: this.email,
                 profile_image: this.profile_image,
+                isAdmin: false,
             };
             const errorReturn = {
                 status: false,
@@ -52,7 +70,7 @@ export class Users implements I_Users {
             const successReturn = {
                 status: true,
                 message: '會員註冊成功',
-                memberinfo: [post],
+                userinfo: [post],
             };
             const SQL = 'SELECT * FROM USERS WHERE twitch_id = ?';
             db.query(SQL, this.twitch_id, (err, result) => {
@@ -61,9 +79,14 @@ export class Users implements I_Users {
                     if (result.length) {
                         // 既有 user 更新他的資料
                         const SQL = 'UPDATE Users SET ? WHERE id = ?';
+                        
                         delete post.id;
+                        delete post.isAdmin;
+
                         db.query(SQL, [post, result[0].id], (err, _result) => {
                             post.id = result[0].id;
+                            post.isAdmin = result[0].isAdmin;
+
                             if(err) reject(errorReturn);
                             else resolve(successReturn);
                         })

@@ -11,6 +11,8 @@ export const refreshTime = '10h';
 
 export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
 export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
+
+export const adminRoutes = [''];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
     const accessToken: string = req.cookies.access;
@@ -68,14 +70,39 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             secure: true,
             domain: cookieDomain,
         });
-        res.redirect(`${domainEnv}:3000`);
+        if (process.env.ENV === "prod") res.redirect(`${domainEnv}:3000`);
+        else {
+            res.json({
+                status: false,
+                href: `${domainEnv}:3000`,
+            })
+        }
     }
 
     function handleNext(userinfo: any) {
+        if (req.path === "/back") {
+            if (!userinfo.isAdmin) {
+                if (process.env.ENV === "prod") {
+                    res.redirect(`${domainEnv}:3000/check`);
+                } else {
+                    res.json({
+                        status: false,
+                        href: `${domainEnv}:3000/check?${userinfo.id}`,
+                    })
+                }
+            } else {
+                res.json({
+                    status: true,
+                    message: "admin 登入成功",
+                })
+            }
+        }
         if (req.path === "/") {
+            const redirectPage = userinfo.isAdmin ? 'back' : 'check';
+
             res.json({
                 status: true,
-                href: `${domainEnv}:3000/check?${userinfo.id}`,
+                href: `${domainEnv}:3000/${redirectPage}?${userinfo.id}`,
             })
         } else next();
     }
@@ -90,6 +117,7 @@ export const initializeDatabase = (connection: mysql.PoolConnection) => {
             name VARCHAR(50) NOT NULL,
             email VARCHAR(100) NOT NULL,
             profile_image VARCHAR(100),
+            isAdmin TINYINT(1) DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS Items (
@@ -100,12 +128,13 @@ export const initializeDatabase = (connection: mysql.PoolConnection) => {
         );
         CREATE TABLE IF NOT EXISTS Checks (
             id VARCHAR(12) PRIMARY KEY,
+            passcode VARCHAR(30),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS UserChecks (
             user_id VARCHAR(12),
             check_id VARCHAR(12),
-            checked TINYINT(1) DEFAULT 1,
+            checked TINYINT(1) DEFAULT 0,
             PRIMARY KEY (user_id, check_id),
             FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
             FOREIGN KEY (check_id) REFERENCES Checks(id) ON DELETE CASCADE,
@@ -127,7 +156,7 @@ export const initializeDatabase = (connection: mysql.PoolConnection) => {
             console.error('Failed to create Users table:', err);
             throw err;
         } else {
-            console.log('Users table is ready.');
+            console.log('tables are ready.');
         }
         connection.release(); // 釋放連接
     });
