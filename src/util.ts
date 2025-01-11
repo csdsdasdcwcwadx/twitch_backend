@@ -20,10 +20,27 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         next();
         return;
     }
+    if (req.path === "/" && (!accessToken || !refreshToken)) {
+        res.clearCookie('refresh', {
+            httpOnly: true,
+            secure: true,
+            domain: cookieDomain,
+        });
+        res.clearCookie('access', {
+            httpOnly: true,
+            secure: true,
+            domain: cookieDomain,
+        });
+        res.json({
+            status: false,
+            message: '請登入',
+        });
+        return;
+    }
 
     try {
         if (!accessToken || !refreshToken) throw new Error('cannot find refresh token or access token');
-        jwt.verify(accessToken, ACCESS_SECRET_KEY, (err, _) => {
+        jwt.verify(accessToken, ACCESS_SECRET_KEY, (err, userinfo) => {
             if (err) {
                 const userinfo = jwt.verify(refreshToken, REFRESH_SECRET_KEY) as JwtPayload;
                 delete userinfo.iat;
@@ -36,9 +53,9 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                     maxAge: 24*60*60*1000,
                     domain: cookieDomain,
                 })
-                next();
+                handleNext(userinfo);
 
-            } else next();
+            } else handleNext(userinfo);
         });
     } catch (e) {
         res.clearCookie('refresh', {
@@ -52,6 +69,15 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             domain: cookieDomain,
         });
         res.redirect(`${domainEnv}:3000`);
+    }
+
+    function handleNext(userinfo: any) {
+        if (req.path === "/") {
+            res.json({
+                status: true,
+                href: `${domainEnv}:3000/check?${userinfo.id}`,
+            })
+        } else next();
     }
 }
 

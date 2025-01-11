@@ -39,10 +39,10 @@ const login = async (req: Request, res: Response) => {
         const accessToken = jwt.sign(userData, ACCESS_SECRET_KEY, {expiresIn: accessTime});
         const refreshToken = jwt.sign(userData, REFRESH_SECRET_KEY, {expiresIn: refreshTime});
 
-        const profile_image = userData.profile_image_url.split('https://static-cdn.jtvnw.net/user-default-pictures-uv')[1];
+        const profile_image = userData.profile_image_url.split('https://static-cdn.jtvnw.net')[1];
         const user = new Users(undefined, userData.id, userData.login, userData.display_name, userData.email, profile_image);
         const result = await user.registry();
-        console.log(result)
+        // console.log(result)
 
         res.cookie('access', accessToken, {
             httpOnly: true,

@@ -9,6 +9,7 @@ import memberRoutes from './Routers/user';
 import { authMiddleWare, initializeDatabase } from "./util";
 import cookieParser from 'cookie-parser';
 import db from "./migration";
+import cors from 'cors';
 dotenv.config();
 
 db.getConnection((err, connection) => {
@@ -33,7 +34,6 @@ app.use(authMiddleWare);
   
 // 一般 API 範例
 app.use(memberRoutes);
-
 
 // 啟動 GraphQL Server 並與 Express 整合
 (async () => {
