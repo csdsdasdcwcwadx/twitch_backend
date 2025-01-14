@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import mysql, { PoolConfig } from 'mysql';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
@@ -8,7 +9,10 @@ export const REFRESH_SECRET_KEY = uuidv4();
 export const accessTime = '15m';
 export const refreshTime = '10h';
 
-export const domainEnv = process.env.ENV === 'prod' ? '' : '';
+export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
+export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
+
+export const adminRoutes = ['/addcheck'];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
     const accessToken: string = req.cookies.access;
@@ -18,10 +22,27 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         next();
         return;
     }
+    if (req.path === "/" && (!accessToken || !refreshToken)) {
+        res.clearCookie('refresh', {
+            httpOnly: true,
+            secure: true,
+            domain: cookieDomain,
+        });
+        res.clearCookie('access', {
+            httpOnly: true,
+            secure: true,
+            domain: cookieDomain,
+        });
+        res.json({
+            status: false,
+            message: '請登入',
+        });
+        return;
+    }
 
     try {
         if (!accessToken || !refreshToken) throw new Error('cannot find refresh token or access token');
-        jwt.verify(accessToken, ACCESS_SECRET_KEY, (err, _) => {
+        jwt.verify(accessToken, ACCESS_SECRET_KEY, (err, userinfo) => {
             if (err) {
                 const userinfo = jwt.verify(refreshToken, REFRESH_SECRET_KEY) as JwtPayload;
                 delete userinfo.iat;
@@ -32,23 +53,129 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                     httpOnly: true,
                     secure: true,
                     maxAge: 24*60*60*1000,
-                    domain: domainEnv,
+                    domain: cookieDomain,
                 })
-                next();
+                handleNext(userinfo);
 
-            } else next();
+            } else handleNext(userinfo);
         });
     } catch (e) {
         res.clearCookie('refresh', {
             httpOnly: true,
             secure: true,
-            domain: domainEnv,
+            domain: cookieDomain,
         });
         res.clearCookie('access', {
             httpOnly: true,
             secure: true,
-            domain: domainEnv,
+            domain: cookieDomain,
         });
-        res.redirect('http://localhost:3000');
+        if (process.env.ENV === "prod") res.redirect(`${domainEnv}:3000`);
+        else {
+            res.json({
+                status: false,
+                href: `${domainEnv}:3000`,
+            })
+        }
+    }
+
+    function handleNext(userinfo: any) {
+        if (req.path === "/back") {
+            if (!userinfo.isAdmin) {
+                if (process.env.ENV === "prod") {
+                    res.redirect(`${domainEnv}:3000/check`);
+                } else {
+                    res.json({
+                        status: false,
+                        href: `${domainEnv}:3000/check?${userinfo.id}`,
+                    })
+                }
+            } else {
+                if (process.env.ENV !== "prod") {
+                    res.json({
+                        status: true,
+                        message: "admin 登入成功",
+                    })
+                }
+            }
+            return;
+        }
+        if (req.path === "/") {
+            const redirectPage = userinfo.isAdmin ? 'back' : 'check';
+
+            res.json({
+                status: true,
+                href: `${domainEnv}:3000/${redirectPage}?${userinfo.id}`,
+            })
+            return;
+        }
+        if (adminRoutes.includes(req.path)) {
+            if (!userinfo.isAdmin) {
+                if (process.env.ENV === "prod") {
+                    res.redirect(`${domainEnv}:3000/check`);
+                } else {
+                    res.json({
+                        status: false,
+                        href: `${domainEnv}:3000/check?${userinfo.id}`,
+                    })
+                }
+                return;
+            }
+        }
+        next();
     }
 }
+
+export const initializeDatabase = (connection: mysql.PoolConnection) => {
+    const createUserTableQuery = `
+        CREATE TABLE IF NOT EXISTS Users (
+            id VARCHAR(12) PRIMARY KEY,
+            twitch_id VARCHAR(20) NOT NULL,
+            login VARCHAR(20) NOT NULL,
+            name VARCHAR(50) NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            profile_image VARCHAR(100),
+            isAdmin TINYINT(1) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS Items (
+            id VARCHAR(12) PRIMARY KEY,
+            name VARCHAR(20) NOT NULL,
+            image VARCHAR(100),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS Checks (
+            id VARCHAR(12) PRIMARY KEY,
+            passcode VARCHAR(30),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS UserChecks (
+            user_id VARCHAR(12),
+            check_id VARCHAR(12),
+            checked TINYINT(1) DEFAULT 0,
+            PRIMARY KEY (user_id, check_id),
+            FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+            FOREIGN KEY (check_id) REFERENCES Checks(id) ON DELETE CASCADE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS UserItems (
+            user_id VARCHAR(12),
+            item_id VARCHAR(12),
+            amount INT,
+            PRIMARY KEY (user_id, item_id),
+            FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+            FOREIGN KEY (item_id) REFERENCES Items(id) ON DELETE CASCADE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    `
+
+    connection.query(createUserTableQuery, (err) => {
+        if (err) {
+            console.error('Failed to create Users table:', err);
+            throw err;
+        } else {
+            console.log('tables are ready.');
+        }
+        connection.release(); // 釋放連接
+    });
+};

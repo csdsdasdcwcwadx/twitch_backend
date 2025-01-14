@@ -1,13 +1,20 @@
 const typeDefs = `
-    type Book {
-        id: ID
-        name: String
-        author: String
-        publish: String
+    type Check {
+        id: String
+        passcode: String
+        created_at: String
     }
-    
+
+    type UserCheck {
+        user_id: String
+        check_id: String
+        checked: Boolean
+        created_at: String
+    }
+
     type Query {
-        books: [Book]
+        getChecks: [Check]
+        getUserChecks: [UserCheck]
     }
 `
 
