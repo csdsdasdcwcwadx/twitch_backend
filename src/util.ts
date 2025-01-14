@@ -12,7 +12,7 @@ export const refreshTime = '10h';
 export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
 export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
 
-export const adminRoutes = [''];
+export const adminRoutes = ['/addcheck'];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
     const accessToken: string = req.cookies.access;
@@ -91,11 +91,14 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                     })
                 }
             } else {
-                res.json({
-                    status: true,
-                    message: "admin 登入成功",
-                })
+                if (process.env.ENV !== "prod") {
+                    res.json({
+                        status: true,
+                        message: "admin 登入成功",
+                    })
+                }
             }
+            return;
         }
         if (req.path === "/") {
             const redirectPage = userinfo.isAdmin ? 'back' : 'check';
@@ -104,7 +107,22 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                 status: true,
                 href: `${domainEnv}:3000/${redirectPage}?${userinfo.id}`,
             })
-        } else next();
+            return;
+        }
+        if (adminRoutes.includes(req.path)) {
+            if (!userinfo.isAdmin) {
+                if (process.env.ENV === "prod") {
+                    res.redirect(`${domainEnv}:3000/check`);
+                } else {
+                    res.json({
+                        status: false,
+                        href: `${domainEnv}:3000/check?${userinfo.id}`,
+                    })
+                }
+                return;
+            }
+        }
+        next();
     }
 }
 
