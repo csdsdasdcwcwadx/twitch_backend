@@ -1,10 +1,10 @@
-import mysql, { PoolConfig } from 'mysql';
+import mysql, { ConnectionOptions } from 'mysql2';
 import dotenv from 'dotenv';
 import fs from 'fs';
 
 dotenv.config();
 
-export const options: PoolConfig = {
+export const options: ConnectionOptions = {
     host: process.env.HOST,
     user: process.env.ROOT_USER,
     password: process.env.PASSWORD,

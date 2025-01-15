@@ -11,8 +11,10 @@ const resolvers = {
             }
             return [];
         },
-        getUserChecks: async () => {
-            const userChecksModel = new UserChecks();
+    },
+    Mutation: {
+        getUserChecks: async (_: any, { userID }: { userID: string }) => {
+            const userChecksModel = new UserChecks(userID);
             const checks = await userChecksModel.getUserChecks();
             if (checks.status) {
                 return checks.usercheckinfo;

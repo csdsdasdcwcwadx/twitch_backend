@@ -7,7 +7,7 @@ import { Users } from '../Models/user';
 const login = async (req: Request, res: Response) => {
     const clientId = process.env.TWITCH_CLIENT_ID;
     const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-    const redirectUri = `${domainEnv}:4000/login`;
+    const redirectUri = `${domainEnv}:4000/twitch/member/login`;
   
     const { code } = req.query;
     if (!code) {
@@ -60,7 +60,7 @@ const login = async (req: Request, res: Response) => {
             if (result.userinfo[0].isAdmin) {
                 res.redirect(`${domainEnv}:3000/back`);
             } else {
-                res.redirect(`${domainEnv}:3000/check?id=${result.userinfo[0].id}`);
+                res.redirect(`${domainEnv}:3000/check?userID=${result.userinfo[0].id}`);
             }
         }
 

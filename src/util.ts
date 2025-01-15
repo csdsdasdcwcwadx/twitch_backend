@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import mysql, { PoolConfig } from 'mysql';
+import mysql, { PoolConnection } from 'mysql2';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
@@ -12,13 +12,13 @@ export const refreshTime = '10h';
 export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
 export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
 
-export const adminRoutes = ['/addcheck'];
+export const adminRoutes = ['/twitch/check/addcheck'];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
     const accessToken: string = req.cookies.access;
     const refreshToken: string = req.cookies.refresh;
 
-    if (req.path === '/login') {
+    if (req.path === '/twitch/member/login') {
         next();
         return;
     }
@@ -83,11 +83,11 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         if (req.path === "/back") {
             if (!userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
-                    res.redirect(`${domainEnv}:3000/check`);
+                    res.redirect(`${domainEnv}:3000/check?userID=${userinfo.id}`);
                 } else {
                     res.json({
-                        status: false,
-                        href: `${domainEnv}:3000/check?${userinfo.id}`,
+                        status: true,
+                        href: `${domainEnv}:3000/check?userID=${userinfo.id}`,
                     })
                 }
             } else {
@@ -102,21 +102,24 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         }
         if (req.path === "/") {
             const redirectPage = userinfo.isAdmin ? 'back' : 'check';
-
-            res.json({
-                status: true,
-                href: `${domainEnv}:3000/${redirectPage}?${userinfo.id}`,
-            })
+            if (process.env.ENV === "prod") {
+                res.redirect(`${domainEnv}:3000/${redirectPage}?userID=${userinfo.id}`);
+            } else {
+                res.json({
+                    status: false,
+                    href: `${domainEnv}:3000/${redirectPage}?userID=${userinfo.id}`,
+                })
+            }
             return;
         }
         if (adminRoutes.includes(req.path)) {
             if (!userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
-                    res.redirect(`${domainEnv}:3000/check`);
+                    res.redirect(`${domainEnv}:3000/check?userID=${userinfo.id}`);
                 } else {
                     res.json({
                         status: false,
-                        href: `${domainEnv}:3000/check?${userinfo.id}`,
+                        href: `${domainEnv}:3000/check?userID=${userinfo.id}`,
                     })
                 }
                 return;
@@ -126,7 +129,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
     }
 }
 
-export const initializeDatabase = (connection: mysql.PoolConnection) => {
+export const initializeDatabase = (connection: PoolConnection) => {
     const createUserTableQuery = `
         CREATE TABLE IF NOT EXISTS Users (
             id VARCHAR(12) PRIMARY KEY,
@@ -147,6 +150,7 @@ export const initializeDatabase = (connection: mysql.PoolConnection) => {
         CREATE TABLE IF NOT EXISTS Checks (
             id VARCHAR(12) PRIMARY KEY,
             passcode VARCHAR(30),
+            status TINYINT(1) DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS UserChecks (

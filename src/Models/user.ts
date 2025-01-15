@@ -1,5 +1,6 @@
 import db from '../migration';
 import { v4 as uuidv4 } from 'uuid';
+import { RowDataPacket } from 'mysql2';
 
 interface I_Users {
     id?: string;
@@ -73,7 +74,7 @@ export class Users implements I_Users {
                 userinfo: [post],
             };
             const SQL = 'SELECT * FROM USERS WHERE twitch_id = ?';
-            db.query(SQL, this.twitch_id, (err, result) => {
+            db.query(SQL, this.twitch_id, (err, result: RowDataPacket[]) => {
                 if (err) reject(errorReturn);
                 else {
                     if (result.length) {
