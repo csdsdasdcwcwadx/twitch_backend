@@ -83,11 +83,11 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         if (req.path === "/back") {
             if (!userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
-                    res.redirect(`${domainEnv}:3000/check`);
+                    res.redirect(`${domainEnv}:3000/check?userID=${userinfo.id}`);
                 } else {
                     res.json({
                         status: true,
-                        href: `${domainEnv}:3000/check?${userinfo.id}`,
+                        href: `${domainEnv}:3000/check?userID=${userinfo.id}`,
                     })
                 }
             } else {
@@ -102,21 +102,24 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         }
         if (req.path === "/") {
             const redirectPage = userinfo.isAdmin ? 'back' : 'check';
-
-            res.json({
-                status: true,
-                href: `${domainEnv}:3000/${redirectPage}?${userinfo.id}`,
-            })
+            if (process.env.ENV === "prod") {
+                res.redirect(`${domainEnv}:3000/${redirectPage}?userID=${userinfo.id}`);
+            } else {
+                res.json({
+                    status: false,
+                    href: `${domainEnv}:3000/${redirectPage}?userID=${userinfo.id}`,
+                })
+            }
             return;
         }
         if (adminRoutes.includes(req.path)) {
             if (!userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
-                    res.redirect(`${domainEnv}:3000/check`);
+                    res.redirect(`${domainEnv}:3000/check?userID=${userinfo.id}`);
                 } else {
                     res.json({
                         status: false,
-                        href: `${domainEnv}:3000/check?${userinfo.id}`,
+                        href: `${domainEnv}:3000/check?userID=${userinfo.id}`,
                     })
                 }
                 return;
@@ -147,6 +150,7 @@ export const initializeDatabase = (connection: PoolConnection) => {
         CREATE TABLE IF NOT EXISTS Checks (
             id VARCHAR(12) PRIMARY KEY,
             passcode VARCHAR(30),
+            status TINYINT(1) DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS UserChecks (

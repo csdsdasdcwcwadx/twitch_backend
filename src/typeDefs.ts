@@ -14,7 +14,10 @@ const typeDefs = `
 
     type Query {
         getChecks: [Check]
-        getUserChecks: [UserCheck]
+    }
+
+    type Mutation {
+        getUserChecks(userID: String!): [UserCheck]
     }
 `
 
