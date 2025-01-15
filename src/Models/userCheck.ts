@@ -60,7 +60,11 @@ export class UserChecks implements I_UserChecks {
 
     getUserChecks(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            const SQL = 'SELECT * FROM UserChecks WHERE user_id = ?';
+            let SQL = 'SELECT * FROM UserChecks WHERE user_id = ?';
+            if (!this.user_id) {
+                SQL = 'SELECT * FROM UserChecks';
+            }
+
             const errorReturn: GetAllErrorResponse = {
                 status: false,
                 message: '取得用戶簽到表失敗',

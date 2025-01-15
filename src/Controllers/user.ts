@@ -60,7 +60,7 @@ const login = async (req: Request, res: Response) => {
             if (result.userinfo[0].isAdmin) {
                 res.redirect(`${domainEnv}:3000/back`);
             } else {
-                res.redirect(`${domainEnv}:3000/check?userID=${result.userinfo[0].id}`);
+                res.redirect(`${domainEnv}:3000/check`);
             }
         }
 

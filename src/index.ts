@@ -8,10 +8,20 @@ import dotenv from 'dotenv';
 
 import memberRoutes from './Routers/user';
 import checkRoutes from './Routers/check';
+import userCheckRoutes from './Routers/userCheck';
 
 import { authMiddleWare, initializeDatabase } from "./util";
 import cookieParser from 'cookie-parser';
 import db from "./migration";
+import { I_Users } from "./Models/user";
+
+declare global {
+  namespace Express {
+    interface Request {
+      userinfo: I_Users;
+    }
+  }
+}
 
 dotenv.config();
 
@@ -40,13 +50,18 @@ app.use(authMiddleWare);
 // 一般 API
 app.use('/twitch/member', memberRoutes);
 app.use('/twitch/check', checkRoutes);
+app.use('/twitch/usercheck', userCheckRoutes);
 
 // 啟動 GraphQL Server 並與 Express 整合
 (async () => {
   await apolloServer.start();
 
   // 將 GraphQL 中介層加入 Express
-  app.use('/graphql', expressMiddleware(apolloServer));
+  app.use('/graphql', expressMiddleware(apolloServer, {
+    context: async ({ req, res }) => ({
+      token: req.userinfo,
+    }),
+  }));
 
   // 啟動伺服器
   const PORT = process.env.PORT || 4000;

@@ -2,7 +2,7 @@ import db from '../migration';
 import { v4 as uuidv4 } from 'uuid';
 import { RowDataPacket } from 'mysql2';
 
-interface I_Users {
+export interface I_Users {
     id?: string;
     twitch_id?: string;
     login?: string;

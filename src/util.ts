@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import mysql, { PoolConnection } from 'mysql2';
+import { I_Users } from './Models/user';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
@@ -55,9 +56,13 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                     maxAge: 24*60*60*1000,
                     domain: cookieDomain,
                 })
-                handleNext(userinfo);
+                req.userinfo = userinfo as I_Users;
+                handleNext();
 
-            } else handleNext(userinfo);
+            } else {
+                req.userinfo = userinfo as I_Users;
+                handleNext();
+            }
         });
     } catch (e) {
         res.clearCookie('refresh', {
@@ -79,15 +84,15 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         }
     }
 
-    function handleNext(userinfo: any) {
+    function handleNext() {
         if (req.path === "/back") {
-            if (!userinfo.isAdmin) {
+            if (!req.userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
-                    res.redirect(`${domainEnv}:3000/check?userID=${userinfo.id}`);
+                    res.redirect(`${domainEnv}:3000/check`);
                 } else {
                     res.json({
                         status: true,
-                        href: `${domainEnv}:3000/check?userID=${userinfo.id}`,
+                        href: `${domainEnv}:3000/check`,
                     })
                 }
             } else {
@@ -101,25 +106,25 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             return;
         }
         if (req.path === "/") {
-            const redirectPage = userinfo.isAdmin ? 'back' : 'check';
+            const redirectPage = req.userinfo.isAdmin ? 'back' : 'check';
             if (process.env.ENV === "prod") {
-                res.redirect(`${domainEnv}:3000/${redirectPage}?userID=${userinfo.id}`);
+                res.redirect(`${domainEnv}:3000/${redirectPage}`);
             } else {
                 res.json({
                     status: false,
-                    href: `${domainEnv}:3000/${redirectPage}?userID=${userinfo.id}`,
+                    href: `${domainEnv}:3000/${redirectPage}`,
                 })
             }
             return;
         }
         if (adminRoutes.includes(req.path)) {
-            if (!userinfo.isAdmin) {
+            if (!req.userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
-                    res.redirect(`${domainEnv}:3000/check?userID=${userinfo.id}`);
+                    res.redirect(`${domainEnv}:3000/check`);
                 } else {
                     res.json({
                         status: false,
-                        href: `${domainEnv}:3000/check?userID=${userinfo.id}`,
+                        href: `${domainEnv}:3000/check`,
                     })
                 }
                 return;
