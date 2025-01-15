@@ -2,9 +2,10 @@ import { QueryError } from 'mysql2';
 import db from '../migration';
 import { v4 as uuidv4 } from 'uuid';
 
-interface I_Checks {
+export interface I_Checks {
     id?: string;
     passcode?: string;
+    created_at?: string;
 }
 interface GetAllSuccessResponse {
     status: true;
@@ -22,10 +23,12 @@ type GetAllResponse = GetAllSuccessResponse | GetAllErrorResponse;
 export class Checks implements I_Checks {
     id?: string;
     passcode?: string;
+    created_at?: string;
 
-    constructor (id?: string, passcode?: string) {
+    constructor (id?: string, passcode?: string, created_at?: string,) {
         this.id = id;
         this.passcode = passcode;
+        this.created_at = created_at;
     }
 
     registry() {
@@ -52,9 +55,12 @@ export class Checks implements I_Checks {
         })
     }
 
-    getall(): Promise<GetAllResponse> {
+    getall(currentYear?: number, currentMonth?: number): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            const SQL = 'SELECT * FROM Checks';
+            let SQL = 'SELECT * FROM Checks';
+            if (currentMonth && currentYear) {
+                SQL = `SELECT * FROM Checks WHERE YEAR(created_at) = ${currentYear} AND MONTH(created_at) = ${currentMonth}`;
+            }
             const errorReturn: GetAllErrorResponse = {
                 status: false,
                 message: '簽到表取得失敗',

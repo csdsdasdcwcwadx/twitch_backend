@@ -3,6 +3,7 @@ const typeDefs = `
         id: String
         passcode: String
         created_at: String
+        userChecks: [UserCheck]
     }
 
     type UserCheck {
@@ -15,10 +16,6 @@ const typeDefs = `
     type Query {
         getChecks: [Check]
     }
-
-    type Mutation {
-        getUserChecks(userID: String!): [UserCheck]
-    }
-`
+`;
 
 export default typeDefs;
