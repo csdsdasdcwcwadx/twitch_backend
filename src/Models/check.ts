@@ -1,4 +1,4 @@
-import { MysqlError } from 'mysql';
+import { QueryError } from 'mysql2';
 import db from '../migration';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -60,7 +60,7 @@ export class Checks implements I_Checks {
                 message: '簽到表取得失敗',
             };
 
-            db.query(SQL, (err: MysqlError, result: I_Checks[]) => {
+            db.query(SQL, (err: QueryError, result: I_Checks[]) => {
                 if (err) reject(errorReturn);
                 else {
                     const successReturn: GetAllSuccessResponse = {

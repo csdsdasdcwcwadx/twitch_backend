@@ -1,4 +1,5 @@
 import db from '../migration';
+import { RowDataPacket } from 'mysql2';
 
 interface I_UserChecks {
     user_id?: string;
@@ -64,18 +65,19 @@ export class UserChecks implements I_UserChecks {
                 status: false,
                 message: '取得用戶簽到表失敗',
             };
-
-            db.query(SQL, this.user_id, (err, result: I_UserChecks[]) => {
-                if (err) reject(errorReturn);
-                else {
+        
+            db.query(SQL, [this.user_id], (err, result: RowDataPacket[]) => {
+                if (err) {
+                    reject(errorReturn);
+                } else {
                     const successReturn: GetAllSuccessResponse = {
                         status: true,
                         message: "取得用戶簽到表成功",
-                        usercheckinfo: result,
-                    }
+                        usercheckinfo: result as I_UserChecks[], // 将结果断言为 I_UserChecks[]
+                    };
                     resolve(successReturn);
                 }
-            })
-        })
+            });
+        });
     }
 }

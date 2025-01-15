@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import mysql, { PoolConfig } from 'mysql';
+import mysql, { PoolConnection } from 'mysql2';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
@@ -86,7 +86,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                     res.redirect(`${domainEnv}:3000/check`);
                 } else {
                     res.json({
-                        status: false,
+                        status: true,
                         href: `${domainEnv}:3000/check?${userinfo.id}`,
                     })
                 }
@@ -126,7 +126,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
     }
 }
 
-export const initializeDatabase = (connection: mysql.PoolConnection) => {
+export const initializeDatabase = (connection: PoolConnection) => {
     const createUserTableQuery = `
         CREATE TABLE IF NOT EXISTS Users (
             id VARCHAR(12) PRIMARY KEY,
