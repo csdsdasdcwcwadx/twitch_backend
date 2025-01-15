@@ -7,7 +7,7 @@ import { Users } from '../Models/user';
 const login = async (req: Request, res: Response) => {
     const clientId = process.env.TWITCH_CLIENT_ID;
     const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-    const redirectUri = `${domainEnv}:4000/login`;
+    const redirectUri = `${domainEnv}:4000/twitch/member/login`;
   
     const { code } = req.query;
     if (!code) {

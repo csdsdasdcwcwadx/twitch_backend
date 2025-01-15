@@ -12,13 +12,13 @@ export const refreshTime = '10h';
 export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
 export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
 
-export const adminRoutes = ['/addcheck'];
+export const adminRoutes = ['/twitch/check/addcheck'];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
     const accessToken: string = req.cookies.access;
     const refreshToken: string = req.cookies.refresh;
 
-    if (req.path === '/login') {
+    if (req.path === '/twitch/member/login') {
         next();
         return;
     }

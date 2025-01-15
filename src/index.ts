@@ -36,10 +36,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(authMiddleWare);
-  
+
 // 一般 API
-app.use(memberRoutes);
-app.use(checkRoutes);
+app.use('/twitch/member', memberRoutes);
+app.use('/twitch/check', checkRoutes);
 
 // 啟動 GraphQL Server 並與 Express 整合
 (async () => {
