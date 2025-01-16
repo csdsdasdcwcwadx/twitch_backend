@@ -3,6 +3,7 @@ const typeDefs = `
         id: String
         passcode: String
         created_at: String
+        streaming: Boolean
         userChecks: [UserCheck]
     }
 

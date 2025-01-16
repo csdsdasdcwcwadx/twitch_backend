@@ -12,6 +12,18 @@ const addCheck = async (req: Request, res: Response) => {
     }
 }
 
+const updateCheckStatus = async (req: Request, res: Response) => {
+    const { streaming, checkId } = req.body;
+    const checkModel = new Checks(checkId, undefined, streaming);
+    try {
+        const result = await checkModel.updateStreaming();
+        res.json(result);
+    } catch (e) {
+        res.json(e);
+    }
+}
+
 export {
     addCheck,
+    updateCheckStatus,
 }
