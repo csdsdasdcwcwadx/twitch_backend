@@ -155,7 +155,7 @@ export const initializeDatabase = (connection: PoolConnection) => {
         CREATE TABLE IF NOT EXISTS Checks (
             id VARCHAR(12) PRIMARY KEY,
             passcode VARCHAR(30),
-            status TINYINT(1) DEFAULT 0,
+            streaming TINYINT(1) DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS UserChecks (

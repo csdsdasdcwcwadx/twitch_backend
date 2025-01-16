@@ -14,6 +14,7 @@ const resolvers = {
                 if (checkList.status) {
                     return checkList.checkinfo;
                 }
+                throw new Error('error');
             } catch (e) {
                 return [];
             }
@@ -23,15 +24,14 @@ const resolvers = {
     Check: {
         userChecks: async (check: I_Checks, args: any, context: I_Users) => {
             const userID = context.id;
-            const userChecksModel = new UserChecks(userID);
+            const userChecksModel = new UserChecks(context.isAdmin ? undefined : userID);
 
             try {
                 const usercheckList = await userChecksModel.getUserChecks();
                 if (usercheckList.status) {
-                    return usercheckList.usercheckinfo.filter(usercheck => {
-                        return usercheck.check_id === check.id;
-                    });
+                    return usercheckList.usercheckinfo.filter(usercheck => usercheck.check_id === check.id);
                 }
+                throw new Error('error');
             } catch(e) {
                 return [];
             }
