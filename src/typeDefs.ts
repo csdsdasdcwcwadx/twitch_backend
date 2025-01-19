@@ -14,8 +14,19 @@ const typeDefs = `
         created_at: String
     }
 
+    type User {
+        id: String
+        twitch_id: String
+        login: String
+        name: String
+        email: String
+        profile_image: String
+        isAdmin: Boolean
+    }
+
     type Query {
         getChecks: [Check]
+        getUsers: [User]
     }
 `;
 

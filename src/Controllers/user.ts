@@ -69,6 +69,28 @@ const login = async (req: Request, res: Response) => {
     }
 }
 
+const logout = async (req: Request, res: Response) => {
+    res.clearCookie('refresh', {
+        httpOnly: true,
+        secure: true,
+        domain: cookieDomain,
+    });
+    res.clearCookie('access', {
+        httpOnly: true,
+        secure: true,
+        domain: cookieDomain,
+    });
+    if (process.env.Env === "prod") {
+        res.redirect(`${domainEnv}:3000`);
+        return;
+    }
+    res.json({
+        status: true,
+        href: `${domainEnv}:3000`,
+    })
+}
+
 export {
     login,
+    logout,
 }
