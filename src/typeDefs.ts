@@ -8,7 +8,7 @@ const typeDefs = `
     }
 
     type UserCheck {
-        users: User
+        user: User
         check_id: String
         checked: Boolean
         created_at: String

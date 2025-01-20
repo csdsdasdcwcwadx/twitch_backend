@@ -42,7 +42,7 @@ const resolvers = {
     },
 
     UserCheck: {
-        users: async (usercheck: I_UserChecks, args: any, context: {token: I_Users}) => {
+        user: async (usercheck: I_UserChecks, args: any, context: {token: I_Users}) => {
             const userModel = new Users(usercheck.user_id);
 
             try {
