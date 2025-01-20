@@ -1,7 +1,6 @@
-import { Checks } from "./Models/check";
-import { I_Users } from "./Models/user";
-import { I_Checks } from "./Models/check";
-import { UserChecks } from "./Models/userCheck";
+import { I_Users, Users } from "./Models/user";
+import { I_Checks, Checks } from "./Models/check";
+import { UserChecks, I_UserChecks } from "./Models/userCheck";
 
 const resolvers = {
     Query: {
@@ -20,19 +19,37 @@ const resolvers = {
             }
         },
         getUsers: async (root: any, args: any, context: {token: I_Users}) => {
-            return [context.token];
+            return context.token;
         }
     },
 
     Check: {
         userChecks: async (check: I_Checks, args: any, context: {token: I_Users}) => {
             const userID = context.token.id;
-            const userChecksModel = new UserChecks(context.token.isAdmin ? undefined : userID);
+            // 用戶只能看到自己的簽到
+            const userChecksModel = new UserChecks(context.token.isAdmin ? undefined : userID, check.id);
 
             try {
                 const usercheckList = await userChecksModel.getUserChecks();
                 if (usercheckList.status) {
-                    return usercheckList.usercheckinfo.filter(usercheck => usercheck.check_id === check.id);
+                    return usercheckList.usercheckinfo;
+                }
+                throw new Error('error');
+            } catch(e) {
+                return [];
+            }
+        },
+    },
+
+    UserCheck: {
+        users: async (usercheck: I_UserChecks, args: any, context: {token: I_Users}) => {
+            const userModel = new Users(usercheck.user_id);
+
+            try {
+                if (!context.token.isAdmin) throw new Error("cannot get users");
+                const result = await userModel.getUsers();
+                if (result.status) {
+                    return result.userinfo[0];
                 }
                 throw new Error('error');
             } catch(e) {

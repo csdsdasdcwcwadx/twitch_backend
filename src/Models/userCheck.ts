@@ -1,7 +1,7 @@
 import db from '../migration';
 import { RowDataPacket } from 'mysql2';
 
-interface I_UserChecks {
+export interface I_UserChecks {
     user_id?: string;
     check_id?: string;
     checked?: boolean;
@@ -60,9 +60,9 @@ export class UserChecks implements I_UserChecks {
 
     getUserChecks(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            let SQL = 'SELECT * FROM UserChecks WHERE user_id = ?';
+            let SQL = 'SELECT * FROM UserChecks WHERE check_id = ? AND user_id = ?';
             if (!this.user_id) {
-                SQL = 'SELECT * FROM UserChecks';
+                SQL = 'SELECT * FROM UserChecks WHERE check_id = ?';
             }
 
             const errorReturn: GetAllErrorResponse = {
@@ -70,7 +70,7 @@ export class UserChecks implements I_UserChecks {
                 message: '取得用戶簽到表失敗',
             };
         
-            db.query(SQL, [this.user_id], (err, result: RowDataPacket[]) => {
+            db.query(SQL, [this.check_id, this.user_id], (err, result: RowDataPacket[]) => {
                 if (err) {
                     reject(errorReturn);
                 } else {
