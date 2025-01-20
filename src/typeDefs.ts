@@ -8,7 +8,7 @@ const typeDefs = `
     }
 
     type UserCheck {
-        user_id: String
+        user: User
         check_id: String
         checked: Boolean
         created_at: String
@@ -26,7 +26,7 @@ const typeDefs = `
 
     type Query {
         getChecks: [Check]
-        getUsers: [User]
+        getUsers: User
     }
 `;
 
