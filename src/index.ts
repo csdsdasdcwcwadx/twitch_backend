@@ -8,7 +8,9 @@ import dotenv from 'dotenv';
 
 import memberRoutes from './Routers/user';
 import checkRoutes from './Routers/check';
+import itemRoutes from './Routers/item';
 import userCheckRoutes from './Routers/userCheck';
+import userItemRoutes from './Routers/userItems';
 
 import { authMiddleWare, initializeDatabase } from "./util";
 import cookieParser from 'cookie-parser';
@@ -50,7 +52,9 @@ app.use(authMiddleWare);
 // 一般 API
 app.use('/twitch/member', memberRoutes);
 app.use('/twitch/check', checkRoutes);
+app.use('/twitch/item', itemRoutes);
 app.use('/twitch/usercheck', userCheckRoutes);
+app.use('/twitch/useritem', userItemRoutes);
 
 // 啟動 GraphQL Server 並與 Express 整合
 (async () => {
