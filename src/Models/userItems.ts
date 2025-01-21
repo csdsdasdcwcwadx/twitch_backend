@@ -1,11 +1,25 @@
 import db from '../migration';
 import { v4 as uuidv4 } from 'uuid';
+import { RowDataPacket } from 'mysql2';
 
-interface I_UserItems {
+export interface I_UserItems {
     user_id?: string;
     item_id?: string;
     amount?: number;
 }
+
+interface GetAllSuccessResponse {
+    status: true;
+    message: string;
+    useriteminfo: I_UserItems[];
+}
+
+interface GetAllErrorResponse {
+    status: false;
+    message: string;
+}
+
+type GetAllResponse = GetAllSuccessResponse | GetAllErrorResponse;
 
 export class UserItems implements I_UserItems {
     user_id?: string;
@@ -44,6 +58,33 @@ export class UserItems implements I_UserItems {
                 if(err) reject(errorReturn);
                 else resolve(successReturn);
             })
+        })
+    }
+
+    getUserItems(): Promise<GetAllResponse> {
+        return new Promise((resolve, reject) => {
+            let SQL = 'SELECT * FROM UserItems WHERE item_id = ? AND user_id = ?';
+            if (!this.user_id) {
+                SQL = 'SELECT * FROM UserItems WHERE item_id = ?';
+            }
+
+            const errorReturn: GetAllErrorResponse = {
+                status: false,
+                message: '取得用戶道具失敗',
+            };
+
+            db.query(SQL, [this.item_id, this.user_id], (err, result: RowDataPacket[]) => {
+                if (err) {
+                    reject(errorReturn);
+                } else {
+                    const successReturn: GetAllSuccessResponse = {
+                        status: true,
+                        message: "取得用戶道具成功",
+                        useriteminfo: result as I_UserItems[], // 将结果断言为 I_UserChecks[]
+                    };
+                    resolve(successReturn);
+                }
+            });
         })
     }
 }

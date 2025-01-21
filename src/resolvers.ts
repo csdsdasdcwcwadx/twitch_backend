@@ -1,6 +1,8 @@
 import { I_Users, Users } from "./Models/user";
 import { I_Checks, Checks } from "./Models/check";
+import { I_Items, Items } from "./Models/item";
 import { UserChecks, I_UserChecks } from "./Models/userCheck";
+import { UserItems } from "./Models/userItems";
 
 const resolvers = {
     Query: {
@@ -20,6 +22,18 @@ const resolvers = {
         },
         getUsers: async (root: any, args: any, context: {token: I_Users}) => {
             return context.token;
+        },
+        getItems: async (root: any, args: any, context: {token: I_Users}) => {
+            const itemModel = new Items();
+            try {
+                const items = await itemModel.getAll();
+                if (items.status) {
+                    return items.iteminfo;
+                }
+                throw new Error('error');
+            } catch (e) {
+                return [];
+            }
         }
     },
 
@@ -56,7 +70,41 @@ const resolvers = {
                 return [];
             }
         }
-    }
+    },
+
+    Item: {
+        userItems: async (item: I_Items, args: any, context: {token: I_Users}) => {
+            const userID = context.token.id;
+            const userItemModel = new UserItems(context.token.isAdmin ? undefined : userID, item.id);
+
+            try {
+                const useritemList = await userItemModel.getUserItems();
+                if (useritemList.status) {
+                    return useritemList.useriteminfo;
+                }
+                throw new Error('error');
+            } catch(e) {
+                return [];
+            }
+        },
+    },
+
+    UserItem: {
+        user: async (usercheck: I_UserChecks, args: any, context: {token: I_Users}) => {
+            const userModel = new Users(usercheck.user_id);
+
+            try {
+                if (!context.token.isAdmin) throw new Error("cannot get users");
+                const result = await userModel.getUsers();
+                if (result.status) {
+                    return result.userinfo[0];
+                }
+                throw new Error('error');
+            } catch(e) {
+                return [];
+            }
+        }
+    },
 }
 
 export default resolvers;

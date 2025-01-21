@@ -1,12 +1,24 @@
 import db from '../migration';
 import { v4 as uuidv4 } from 'uuid';
 
-interface I_Items {
+export interface I_Items {
     id?: string;
     name?: string;
     image?: string;
 }
 
+interface GetAllSuccessResponse {
+    status: true;
+    message: string;
+    iteminfo: I_Items[];
+}
+
+interface GetAllErrorResponse {
+    status: false;
+    message: string;
+}
+
+type GetAllResponse = GetAllSuccessResponse | GetAllErrorResponse;
 export class Items implements I_Items {
     id?: string;
     name?: string;
@@ -45,6 +57,29 @@ export class Items implements I_Items {
             db.query(SQL, post, (err, _result) => {
                 if(err) reject(errorReturn);
                 else resolve(successReturn);
+            })
+        })
+    }
+
+    getAll(): Promise<GetAllResponse> {
+        return new Promise((resolve, reject) => {
+            const SQL = "SELECT * from Items";
+
+            const errorReturn = {
+                status: false,
+                message: "取得道具失敗",
+            };
+
+            db.query(SQL, (err, result) => {
+                if (err) reject(errorReturn);
+                else {
+                    const successReturn = {
+                        status: true,
+                        message: "取得道具成功",
+                        iteminfo: result as I_Items[],
+                    }
+                    resolve(successReturn);
+                }
             })
         })
     }

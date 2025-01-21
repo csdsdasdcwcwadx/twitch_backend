@@ -24,9 +24,25 @@ const typeDefs = `
         isAdmin: Boolean
     }
 
+    type Item {
+        id: String
+        name: String
+        image: String
+        created_at: String
+        userItems: [UserItem]
+    }
+
+    type UserItem {
+        user: User
+        item: String
+        amount: Int
+        created_at: String
+    }
+
     type Query {
         getChecks: [Check]
         getUsers: User
+        getItems: [Item]
     }
 `;
 

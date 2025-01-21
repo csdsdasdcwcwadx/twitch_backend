@@ -97,14 +97,7 @@ const logout = async (req: Request, res: Response) => {
                 secure: true,
                 domain: cookieDomain,
             });
-            if (process.env.Env === "prod") {
-                res.redirect(`${domainEnv}:3000`);
-                return;
-            }
-            res.json({
-                status: true,
-                href: `${domainEnv}:3000`,
-            })
+            res.redirect(`${domainEnv}:3000`);
             return;   
         }
         throw new Error("登出失敗");
