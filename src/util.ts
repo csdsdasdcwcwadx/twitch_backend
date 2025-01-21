@@ -14,6 +14,8 @@ export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
 export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
 
 export const adminRoutes = ['/twitch/check/addcheck'];
+
+export const frontPages = ['/check', '/game', '/pack'];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
     const accessToken: string = req.cookies.access;
@@ -127,6 +129,15 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                         href: `${domainEnv}:3000/check`,
                     })
                 }
+                return;
+            }
+        }
+        if (process.env.ENV !== "prod") {
+            if (frontPages.includes(req.path)) {
+                res.json({
+                    status: true,
+                    message: "成功進入此頁",
+                });
                 return;
             }
         }
