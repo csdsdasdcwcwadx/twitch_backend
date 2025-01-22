@@ -36,6 +36,11 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             secure: true,
             domain: cookieDomain,
         });
+        res.clearCookie('twitch', {
+            httpOnly: true,
+            secure: true,
+            domain: cookieDomain,
+        });
         res.json({
             status: false,
             message: '請登入',
@@ -73,6 +78,11 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             domain: cookieDomain,
         });
         res.clearCookie('access', {
+            httpOnly: true,
+            secure: true,
+            domain: cookieDomain,
+        });
+        res.clearCookie('twitch', {
             httpOnly: true,
             secure: true,
             domain: cookieDomain,

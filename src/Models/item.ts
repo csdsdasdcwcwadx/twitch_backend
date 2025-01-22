@@ -5,6 +5,9 @@ export interface I_Items {
     id?: string;
     name?: string;
     image?: string;
+    description?: string;
+    point?: number;
+    type?: string;
 }
 
 interface GetAllSuccessResponse {
