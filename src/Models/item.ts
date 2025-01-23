@@ -6,7 +6,6 @@ export interface I_Items {
     name?: string;
     image?: string;
     description?: string;
-    point?: number;
     type?: string;
 }
 
@@ -26,16 +25,22 @@ export class Items implements I_Items {
     id?: string;
     name?: string;
     image?: string;
+    description?: string;
+    type?: string;
 
     constructor (
         id?: string,
         name?: string,
         image?: string,
+        description?: string,
+        type?: string,
 
     ) {
         this.id = id;
         this.name = name;
         this.image = image;
+        this.description = description;
+        this.type = type;
     }
 
     registry() {
@@ -46,6 +51,8 @@ export class Items implements I_Items {
                 id,
                 name: this.name,
                 image: this.image,
+                description: this.description,
+                type: this.type,
             };
             const errorReturn = {
                 status: false,

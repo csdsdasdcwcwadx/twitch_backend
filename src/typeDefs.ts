@@ -28,6 +28,8 @@ const typeDefs = `
         id: String
         name: String
         image: String
+        description: String
+        type: String
         created_at: String
         userItems: [UserItem]
     }

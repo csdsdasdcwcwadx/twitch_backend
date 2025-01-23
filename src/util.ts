@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import path from 'path';
+import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import mysql, { PoolConnection } from 'mysql2';
@@ -153,7 +155,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         }
         next();
     }
-}
+};
 
 export const initializeDatabase = (connection: PoolConnection) => {
     const createUserTableQuery = `
@@ -171,6 +173,8 @@ export const initializeDatabase = (connection: PoolConnection) => {
             id VARCHAR(12) PRIMARY KEY,
             name VARCHAR(20) NOT NULL,
             image VARCHAR(100),
+            description VARCHAR(100),
+            type VARCHAR(20),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS Checks (
@@ -208,4 +212,24 @@ export const initializeDatabase = (connection: PoolConnection) => {
         }
         connection.release(); // 釋放連接
     });
+};
+
+export const uploadImage = (imageBuffer: Buffer, filename: string, removefile?: string): string => {
+    const imagePath = './src/Images';
+
+    const targetFolder = path.join(__dirname, imagePath);
+    if (!fs.existsSync(targetFolder)) {
+        fs.mkdirSync(targetFolder);
+    }
+
+    if(removefile) {
+        const removefilePath = path.join(targetFolder, removefile);
+        if(fs.existsSync(removefilePath)) {
+            fs.unlinkSync(removefilePath);
+        }
+    }
+
+    const filePath = path.join(targetFolder, filename);
+    fs.writeFileSync(filePath, imageBuffer, {flag: 'w'});
+    return filePath;
 };
