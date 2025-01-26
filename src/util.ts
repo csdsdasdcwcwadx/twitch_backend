@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import mysql, { PoolConnection } from 'mysql2';
+import { PoolConnection } from 'mysql2';
 import { I_Users } from './Models/user';
 
 export const ACCESS_SECRET_KEY = uuidv4();
@@ -99,7 +99,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
     }
 
     function handleNext() {
-        if (req.path === "/back") {
+        if (req.path.includes("/back")) {
             if (!req.userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
                     res.redirect(`${domainEnv}:3000/check`);
@@ -214,22 +214,29 @@ export const initializeDatabase = (connection: PoolConnection) => {
     });
 };
 
-export const uploadImage = (imageBuffer: Buffer, filename: string, removefile?: string): string => {
-    const imagePath = './src/Images';
+export const uploadImage = (imageBuffer: Buffer, filename: string): string => {
+    const imagePath = './Images';
 
     const targetFolder = path.join(__dirname, imagePath);
     if (!fs.existsSync(targetFolder)) {
         fs.mkdirSync(targetFolder);
     }
 
-    if(removefile) {
-        const removefilePath = path.join(targetFolder, removefile);
-        if(fs.existsSync(removefilePath)) {
-            fs.unlinkSync(removefilePath);
-        }
-    }
-
     const filePath = path.join(targetFolder, filename);
     fs.writeFileSync(filePath, imageBuffer, {flag: 'w'});
     return filePath;
 };
+
+export const deleteImage = (removefile: string) => {
+    const imagePath = './Images';
+
+    const targetFolder = path.join(__dirname, imagePath);
+    if (!fs.existsSync(targetFolder)) {
+        fs.mkdirSync(targetFolder);
+    }
+
+    const removefilePath = path.join(targetFolder, removefile);
+    if(fs.existsSync(removefilePath)) {
+        fs.unlinkSync(removefilePath);
+    }
+}
