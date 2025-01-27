@@ -34,6 +34,19 @@ const resolvers = {
             } catch (e) {
                 return [];
             }
+        },
+        getAllUsers: async (root: any, args: any, context: {token: I_Users}) => {
+            const userModel = new Users();
+            try {
+                if (!context.token.isAdmin) throw new Error('unauthorized');
+                const users = await userModel.getAllUsers();
+                if (users.status) {
+                    return users.userinfo;
+                }
+                throw new Error('error');
+            } catch (e) {
+                return [];
+            }
         }
     },
 

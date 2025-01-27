@@ -15,7 +15,16 @@ export const refreshTime = '10h';
 export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
 export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
 
-export const adminRoutes = ['/twitch/check/addcheck'];
+export const adminRoutes = [
+    // check
+    '/twitch/check/addcheck',
+    '/twitch/check/updatecheckstatus',
+    // item
+    '/twitch/item/additem',
+    '/twitch/item/deleteitem',
+    // useritem
+    '/twitch/useritem/ownitem',
+];
 
 export const frontPages = ['/check', '/game', '/pack'];
  
@@ -120,7 +129,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             return;
         }
         if (req.path === "/") {
-            const redirectPage = req.userinfo.isAdmin ? 'back' : 'check';
+            const redirectPage = req.userinfo.isAdmin ? 'back/check' : 'check';
             if (process.env.ENV === "prod") {
                 res.redirect(`${domainEnv}:3000/${redirectPage}`);
             } else {
@@ -144,8 +153,8 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                 return;
             }
         }
-        if (process.env.ENV !== "prod") {
-            if (frontPages.includes(req.path)) {
+        if (frontPages.includes(req.path)) {
+            if (process.env.ENV !== "prod") {
                 res.json({
                     status: true,
                     message: "成功進入此頁",
@@ -175,6 +184,7 @@ export const initializeDatabase = (connection: PoolConnection) => {
             image VARCHAR(100),
             description VARCHAR(100),
             type VARCHAR(20),
+            quantity INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS Checks (

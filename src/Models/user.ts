@@ -126,4 +126,26 @@ export class Users implements I_Users {
             })
         })
     }
+
+    getAllUsers(): Promise<GetAllResponse> {
+        return new Promise((resolve, reject) => {
+            const SQL = 'SELECT * FROM users WHERE isAdmin = 0';
+            const errorReturn = {
+                status: false,
+                message: '取得用戶失敗',
+            };
+
+            db.query(SQL, (err, result) => {
+                if (err) reject(errorReturn);
+                else {
+                    const successReturn = {
+                        status: true,
+                        message: '取得用戶成功',
+                        userinfo: result as I_Users[],
+                    }
+                    resolve(successReturn);
+                }
+            })
+        })
+    }
 }

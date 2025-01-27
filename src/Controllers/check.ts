@@ -6,6 +6,7 @@ const addCheck = async (req: Request, res: Response) => {
     const checkModel = new Checks(undefined, passcode);
     try {
         const result = await checkModel.registry();
+        // 簽到成功後新增一個道具
         res.json(result);
     } catch (e) {
         res.json(e);

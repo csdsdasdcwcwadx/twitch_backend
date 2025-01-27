@@ -64,7 +64,7 @@ const login = async (req: Request, res: Response) => {
                 domain: cookieDomain,
             })
             if (result.userinfo[0].isAdmin) {
-                res.redirect(`${domainEnv}:3000/back`);
+                res.redirect(`${domainEnv}:3000/back/check`);
             } else {
                 res.redirect(`${domainEnv}:3000/check`);
             }

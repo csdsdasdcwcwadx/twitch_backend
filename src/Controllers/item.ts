@@ -41,7 +41,7 @@ const deleteItem = async (req: Request, res: Response) => {
 
     try {
         const result = await itemModel.deleteItem();
-        deleteImage(existimagename);
+        if(existimagename) deleteImage(existimagename);
         res.json(result);
     } catch (e) {
         res.json(e);

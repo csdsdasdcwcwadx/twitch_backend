@@ -36,7 +36,6 @@ const typeDefs = `
 
     type UserItem {
         user: User
-        item: String
         amount: Int
         created_at: String
     }
@@ -45,6 +44,7 @@ const typeDefs = `
         getChecks: [Check]
         getUsers: User
         getItems: [Item]
+        getAllUsers: [User]
     }
 `;
 
