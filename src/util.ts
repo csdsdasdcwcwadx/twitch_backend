@@ -184,7 +184,7 @@ export const initializeDatabase = (connection: PoolConnection) => {
             image VARCHAR(100),
             description VARCHAR(100),
             type VARCHAR(20),
-            quantity INT,
+            amount INT DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS Checks (
@@ -210,6 +210,15 @@ export const initializeDatabase = (connection: PoolConnection) => {
             FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
             FOREIGN KEY (item_id) REFERENCES Items(id) ON DELETE CASCADE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS Redemptions (
+            id VARCHAR(12) PRIMARY KEY,
+            user_id VARCHAR(12) NOT NULL,
+            item_id VARCHAR(12) NOT NULL,
+            amount INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+            FOREIGN KEY (item_id) REFERENCES Items(id) ON DELETE CASCADE
         );
     `
 
