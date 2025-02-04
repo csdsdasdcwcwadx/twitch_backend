@@ -6,7 +6,6 @@ export interface I_Items {
     name?: string;
     image?: string;
     description?: string;
-    point?: number;
     type?: string;
 }
 
@@ -26,16 +25,22 @@ export class Items implements I_Items {
     id?: string;
     name?: string;
     image?: string;
+    description?: string;
+    type?: string;
 
     constructor (
         id?: string,
         name?: string,
         image?: string,
+        description?: string,
+        type?: string,
 
     ) {
         this.id = id;
         this.name = name;
         this.image = image;
+        this.description = description;
+        this.type = type;
     }
 
     registry() {
@@ -46,6 +51,8 @@ export class Items implements I_Items {
                 id,
                 name: this.name,
                 image: this.image,
+                description: this.description,
+                type: this.type,
             };
             const errorReturn = {
                 status: false,
@@ -83,6 +90,57 @@ export class Items implements I_Items {
                     }
                     resolve(successReturn);
                 }
+            })
+        })
+    }
+
+    updateItem() {
+        return new Promise((resolve, reject) => {
+
+            const post: I_Items = {
+                name: this.name,
+                image: this.image,
+                description: this.description,
+                type: this.type,
+            };
+            const errorReturn = {
+                status: false,
+                message: '物品更新失敗',
+            };
+            const SQL = `
+                UPDATE Items SET ? WHERE id = ?; 
+                SELECT * FROM Items WHERE id = ?;
+            `;
+            db.query(SQL, [post, this.id, this.id], (err, result) => {
+                if(err) reject(errorReturn);
+                else {
+                    const successReturn = {
+                        status: true,
+                        message: '物品更新成功',
+                        iteminfo: result,
+                    };
+                    resolve(successReturn);
+                }
+            })
+        })
+    }
+
+    deleteItem () {
+        return new Promise((resolve, reject) => {
+            const SQL = 'DELETE FROM Items WHERE id = ?';
+
+            db.query(SQL, this.id, (err, result) => {
+                const errorReturn = {
+                    status: false,
+                    message: '物品刪除失敗',
+                }
+                const successReturn = {
+                    status: true,
+                    message: '物品刪除成功',
+                }
+
+                if(err) reject(errorReturn);
+                else resolve(successReturn);
             })
         })
     }

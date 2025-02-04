@@ -28,13 +28,14 @@ const typeDefs = `
         id: String
         name: String
         image: String
+        description: String
+        type: String
         created_at: String
         userItems: [UserItem]
     }
 
     type UserItem {
         user: User
-        item: String
         amount: Int
         created_at: String
     }
@@ -43,6 +44,7 @@ const typeDefs = `
         getChecks: [Check]
         getUsers: User
         getItems: [Item]
+        getAllUsers: [User]
     }
 `;
 

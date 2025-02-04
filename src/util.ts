@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
+import path from 'path';
+import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import mysql, { PoolConnection } from 'mysql2';
+import { PoolConnection } from 'mysql2';
 import { I_Users } from './Models/user';
 
 export const ACCESS_SECRET_KEY = uuidv4();
@@ -13,7 +15,16 @@ export const refreshTime = '10h';
 export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
 export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
 
-export const adminRoutes = ['/twitch/check/addcheck'];
+export const adminRoutes = [
+    // check
+    '/twitch/check/addcheck',
+    '/twitch/check/updatecheckstatus',
+    // item
+    '/twitch/item/additem',
+    '/twitch/item/deleteitem',
+    // useritem
+    '/twitch/useritem/ownitem',
+];
 
 export const frontPages = ['/check', '/game', '/pack'];
  
@@ -97,7 +108,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
     }
 
     function handleNext() {
-        if (req.path === "/back") {
+        if (req.path.includes("/back")) {
             if (!req.userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
                     res.redirect(`${domainEnv}:3000/check`);
@@ -118,7 +129,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             return;
         }
         if (req.path === "/") {
-            const redirectPage = req.userinfo.isAdmin ? 'back' : 'check';
+            const redirectPage = req.userinfo.isAdmin ? 'back/check' : 'check';
             if (process.env.ENV === "prod") {
                 res.redirect(`${domainEnv}:3000/${redirectPage}`);
             } else {
@@ -142,8 +153,8 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                 return;
             }
         }
-        if (process.env.ENV !== "prod") {
-            if (frontPages.includes(req.path)) {
+        if (frontPages.includes(req.path)) {
+            if (process.env.ENV !== "prod") {
                 res.json({
                     status: true,
                     message: "成功進入此頁",
@@ -153,7 +164,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         }
         next();
     }
-}
+};
 
 export const initializeDatabase = (connection: PoolConnection) => {
     const createUserTableQuery = `
@@ -171,6 +182,9 @@ export const initializeDatabase = (connection: PoolConnection) => {
             id VARCHAR(12) PRIMARY KEY,
             name VARCHAR(20) NOT NULL,
             image VARCHAR(100),
+            description VARCHAR(100),
+            type VARCHAR(20),
+            amount INT DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS Checks (
@@ -197,6 +211,15 @@ export const initializeDatabase = (connection: PoolConnection) => {
             FOREIGN KEY (item_id) REFERENCES Items(id) ON DELETE CASCADE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+        CREATE TABLE IF NOT EXISTS Redemptions (
+            id VARCHAR(12) PRIMARY KEY,
+            user_id VARCHAR(12) NOT NULL,
+            item_id VARCHAR(12) NOT NULL,
+            amount INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+            FOREIGN KEY (item_id) REFERENCES Items(id) ON DELETE CASCADE
+        );
     `
 
     connection.query(createUserTableQuery, (err) => {
@@ -209,3 +232,30 @@ export const initializeDatabase = (connection: PoolConnection) => {
         connection.release(); // 釋放連接
     });
 };
+
+export const uploadImage = (imageBuffer: Buffer, filename: string): string => {
+    const imagePath = './Images';
+
+    const targetFolder = path.join(__dirname, imagePath);
+    if (!fs.existsSync(targetFolder)) {
+        fs.mkdirSync(targetFolder);
+    }
+
+    const filePath = path.join(targetFolder, filename);
+    fs.writeFileSync(filePath, imageBuffer, {flag: 'w'});
+    return filePath;
+};
+
+export const deleteImage = (removefile: string) => {
+    const imagePath = './Images';
+
+    const targetFolder = path.join(__dirname, imagePath);
+    if (!fs.existsSync(targetFolder)) {
+        fs.mkdirSync(targetFolder);
+    }
+
+    const removefilePath = path.join(targetFolder, removefile);
+    if(fs.existsSync(removefilePath)) {
+        fs.unlinkSync(removefilePath);
+    }
+}

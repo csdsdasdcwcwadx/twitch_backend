@@ -38,8 +38,6 @@ export class UserItems implements I_UserItems {
 
     registry() {
         return new Promise((resolve, reject) => {
-            const id = uuidv4().substring(0, 12);
-
             const post: I_UserItems = {
                 user_id: this.user_id,
                 item_id: this.item_id,
@@ -53,10 +51,24 @@ export class UserItems implements I_UserItems {
                 status: true,
                 message: '物品領取成功',
             };
-            const SQL = 'INSERT INTO UserChecks SET ?';
-            db.query(SQL, post, (err, _result) => {
+            const SQL = 'SELECT * FROM UserItems WHERE user_id = ? AND item_id = ?';
+            db.query(SQL, [this.user_id, this.item_id], (err, result: RowDataPacket[]) => {
                 if(err) reject(errorReturn);
-                else resolve(successReturn);
+                else {
+                    if (result.length) {
+                        const SQL = 'UPDATE UserItems SET ? WHERE user_id = ? AND item_id = ?';
+                        db.query(SQL, [post, this.user_id, this.item_id], (err, result) => {
+                            if(err) reject(errorReturn);
+                            else resolve(successReturn);
+                        })
+                    } else {
+                        const SQL = 'INSERT INTO UserItems SET ?';
+                        db.query(SQL, post, (err, result) => {
+                            if(err) reject(errorReturn);
+                            else resolve(successReturn);
+                        })
+                    }
+                }
             })
         })
     }

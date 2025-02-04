@@ -5,6 +5,7 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
+import path from 'path';
 
 import memberRoutes from './Routers/user';
 import checkRoutes from './Routers/check';
@@ -48,6 +49,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(authMiddleWare);
+
+// 圖片路徑
+app.use('/twitch/item/images', express.static(path.join(__dirname, 'Images')));
 
 // 一般 API
 app.use('/twitch/member', memberRoutes);
