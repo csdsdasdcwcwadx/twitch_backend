@@ -30,6 +30,7 @@ const typeDefs = `
         image: String
         description: String
         type: String
+        amount: Int
         created_at: String
         userItems: [UserItem]
     }
