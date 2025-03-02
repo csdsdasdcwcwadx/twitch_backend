@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { uploadImage, deleteImage } from "../util";
 
 const addItem = async (req: Request, res: Response) => {
-    const { name, description, type, existimagename } = req.body;
+    const { name, description, type, existimagename, amount } = req.body;
     const { id } = req.query;
 
     const imageBuffer = req.file?.buffer;
@@ -19,7 +19,7 @@ const addItem = async (req: Request, res: Response) => {
         filename = `${imageName}.jpg`;
         uploadImage(imageBuffer, filename);
     }
-    const itemModel = new Items(id as string, name, filename, description, type);
+    const itemModel = new Items(id as string, name, filename, description, type, amount);
 
     try {
         if (id) {

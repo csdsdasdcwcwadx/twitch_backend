@@ -13,11 +13,6 @@ const ownItem = async (req: Request, res: Response) => {
     }
 }
 
-const exchange = async  (req: Request, res: Response) => {
-    const { userId, itemId, amount } = req.body;
-}
-
 export {
     ownItem,
-    exchange,
 }

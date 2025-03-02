@@ -26,7 +26,7 @@ const resolvers = {
         getItems: async (root: any, args: any, context: {token: I_Users}) => {
             const itemModel = new Items();
             try {
-                const items = await itemModel.getAll();
+                const items = await itemModel.getItems();
                 if (items.status) {
                     return items.iteminfo;
                 }

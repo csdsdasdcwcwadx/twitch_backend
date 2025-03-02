@@ -7,6 +7,7 @@ export interface I_Items {
     image?: string;
     description?: string;
     type?: string;
+    amount?: number;
 }
 
 interface GetAllSuccessResponse {
@@ -27,6 +28,7 @@ export class Items implements I_Items {
     image?: string;
     description?: string;
     type?: string;
+    amount?: number;
 
     constructor (
         id?: string,
@@ -34,6 +36,7 @@ export class Items implements I_Items {
         image?: string,
         description?: string,
         type?: string,
+        amount?: number,
 
     ) {
         this.id = id;
@@ -41,6 +44,7 @@ export class Items implements I_Items {
         this.image = image;
         this.description = description;
         this.type = type;
+        this.amount = amount;
     }
 
     registry() {
@@ -53,6 +57,7 @@ export class Items implements I_Items {
                 image: this.image,
                 description: this.description,
                 type: this.type,
+                amount: this.amount,
             };
             const errorReturn = {
                 status: false,
@@ -71,16 +76,17 @@ export class Items implements I_Items {
         })
     }
 
-    getAll(): Promise<GetAllResponse> {
+    getItems(all = true): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            const SQL = "SELECT * from Items";
+            let SQL = "SELECT * from Items";
+            if (!all) SQL = "SELECT * from Items WHERE id = ?";
 
             const errorReturn = {
                 status: false,
                 message: "取得道具失敗",
             };
 
-            db.query(SQL, (err, result) => {
+            db.query(SQL, [this.id], (err, result) => {
                 if (err) reject(errorReturn);
                 else {
                     const successReturn = {
@@ -102,6 +108,7 @@ export class Items implements I_Items {
                 image: this.image,
                 description: this.description,
                 type: this.type,
+                amount: this.amount,
             };
             const errorReturn = {
                 status: false,

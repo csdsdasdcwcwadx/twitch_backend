@@ -99,4 +99,24 @@ export class UserItems implements I_UserItems {
             });
         })
     }
+
+    updateUserItems() {
+        return new Promise((resolve, reject) => {
+            const SQL = 'UPDATE UserItems SET amount = ? WHERE user_id = ? AND item_id = ?';
+            const errReturn = {
+                status: false,
+                message: "更新用戶道具失敗",
+            }
+
+            const successReturn = {
+                status: true,
+                message: "更新用戶道具成功",
+            }
+
+            db.query(SQL, [this.amount, this.user_id, this.item_id], (err, result) => {
+                if (err) reject(errReturn);
+                else resolve(successReturn);
+            })
+        })
+    }
 }
