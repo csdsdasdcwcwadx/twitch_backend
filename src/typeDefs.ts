@@ -22,6 +22,7 @@ const typeDefs = `
         email: String
         profile_image: String
         isAdmin: Boolean
+        created_at: String
     }
 
     type Item {
@@ -41,11 +42,19 @@ const typeDefs = `
         created_at: String
     }
 
+    type Redemption {
+        id: String
+        amount: Int
+        created_at: String
+        item: Item
+    }
+
     type Query {
         getChecks: [Check]
         getUsers: User
         getItems: [Item]
         getAllUsers: [User]
+        getRedemptions: [Redemption]
     }
 `;
 

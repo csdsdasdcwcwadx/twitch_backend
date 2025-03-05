@@ -3,6 +3,7 @@ import { I_Checks, Checks } from "./Models/check";
 import { I_Items, Items } from "./Models/item";
 import { UserChecks, I_UserChecks } from "./Models/userCheck";
 import { UserItems } from "./Models/userItems";
+import { I_Redemptions, Redemption } from "./Models/redemption";
 
 const resolvers = {
     Query: {
@@ -42,6 +43,20 @@ const resolvers = {
                 const users = await userModel.getAllUsers();
                 if (users.status) {
                     return users.userinfo;
+                }
+                throw new Error('error');
+            } catch (e) {
+                return [];
+            }
+        },
+        getRedemptions: async (root: any, args: any, context: {token: I_Users}) => {
+            const userID = context.token.id;
+            const redemptionModel = new Redemption(undefined, context.token.isAdmin ? undefined : userID);
+
+            try {
+                const redemptionList = await redemptionModel.getRedemptions();
+                if (redemptionList.status) {
+                    return redemptionList.redemptioninfo;
                 }
                 throw new Error('error');
             } catch (e) {
@@ -118,6 +133,21 @@ const resolvers = {
             }
         }
     },
+
+    Redemption: {
+        item: async (redemption: I_Redemptions) => {
+            const itemModel = new Items(redemption.item_id);
+            try {
+                const items = await itemModel.getItems(false);
+                if (items.status) {
+                    return items.iteminfo[0];
+                }
+                throw new Error('error');
+            } catch(e) {
+                return [];
+            }
+        }
+    }
 }
 
 export default resolvers;
