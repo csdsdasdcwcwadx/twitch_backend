@@ -72,4 +72,30 @@ export class Redemption implements I_Redemptions {
             })
         })
     }
+
+    getRedemptions(): Promise<GetAllResponse> {
+        return new Promise((resolve, reject) => {
+            let SQL = 'SELECT * FROM Redemptions WHERE user_id = ?';
+            if (!this.user_id) {
+                SQL = 'SELECT * FROM Redemptions GROUP BY user_id';
+            }
+
+            const errorReturn: GetAllErrorResponse = {
+                status: false,
+                message: '取得兌換道具失敗',
+            };
+
+            db.query(SQL, [this.user_id], (err, result) => {
+                if (err) reject(errorReturn);
+                else {
+                    const successReturn = {
+                        status: true,
+                        message: "取得兌換道具成功",
+                        redemptioninfo: result as I_Redemptions[],
+                    }
+                    resolve(successReturn);
+                }
+            })
+        })
+    }
 }

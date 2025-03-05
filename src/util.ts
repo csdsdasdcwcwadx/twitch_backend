@@ -26,7 +26,7 @@ export const adminRoutes = [
     '/twitch/useritem/ownitem',
 ];
 
-export const frontPages = ['/check', '/game', '/pack'];
+export const frontPages = ['/check', '/game', '/pack', '/exchange'];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
     const accessToken: string = req.cookies.access;
