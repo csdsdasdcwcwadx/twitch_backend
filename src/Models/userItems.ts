@@ -75,9 +75,9 @@ export class UserItems implements I_UserItems {
 
     getUserItems(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            let SQL = 'SELECT * FROM UserItems WHERE item_id = ? AND user_id = ?';
+            let SQL = 'SELECT * FROM UserItems WHERE item_id = ? AND user_id = ? ORDER BY created_at DESC';
             if (!this.user_id) {
-                SQL = 'SELECT * FROM UserItems WHERE item_id = ?';
+                SQL = 'SELECT * FROM UserItems WHERE item_id = ? ORDER BY created_at DESC';
             }
 
             const errorReturn: GetAllErrorResponse = {
