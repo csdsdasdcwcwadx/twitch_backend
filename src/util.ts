@@ -4,7 +4,7 @@ import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { PoolConnection } from 'mysql2';
-import { I_Users } from './Models/user';
+import { I_Users, Users } from './Models/user';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
@@ -24,6 +24,8 @@ export const adminRoutes = [
     '/twitch/item/deleteitem',
     // useritem
     '/twitch/useritem/ownitem',
+    // redemption
+    '/twitch/redemp/update',
 ];
 
 export const frontPages = ['/check', '/game', '/pack', '/exchange'];
@@ -107,7 +109,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         }
     }
 
-    function handleNext() {
+    async function handleNext() {
         if (req.path.includes("/back")) {
             if (!req.userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
@@ -141,6 +143,16 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             return;
         }
         if (adminRoutes.includes(req.path)) {
+            const userModel = new Users(req.userinfo.id);
+            const userinfo = await userModel.getUsers();
+
+            // 抓取資料庫資料確認
+            if (userinfo.status) {
+                req.userinfo.isAdmin = userinfo.userinfo[0].isAdmin;
+            } else {
+                req.userinfo.isAdmin = false;
+            }
+
             if (!req.userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
                     res.redirect(`${domainEnv}:3000/check`);

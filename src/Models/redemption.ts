@@ -118,7 +118,7 @@ export class Redemption implements I_Redemptions {
                 message: "兌換處理完成",
             };
 
-            db.query(SQL, [this.id], (err, result) => {
+            db.query(SQL, [this.status, this.id], (err, result) => {
                 if (err) reject(errReturn);
                 else resolve(successReturn);
             })
