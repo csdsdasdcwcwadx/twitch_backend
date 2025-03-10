@@ -6,6 +6,7 @@ export interface I_Redemptions {
     id?: string;
     user_id?: string;
     item_id?: string;
+    status?: boolean;
     amount?: number;
     created_at?: string;
 }
@@ -27,6 +28,7 @@ export class Redemption implements I_Redemptions {
     id?: string;
     user_id?: string;
     item_id?: string;
+    status?: boolean;
     amount?: number;
     created_at?: string;
 
@@ -34,6 +36,7 @@ export class Redemption implements I_Redemptions {
         id?: string,
         user_id?: string,
         item_id?: string,
+        status?: boolean,
         amount?: number,
         created_at?: string,
 
@@ -41,6 +44,7 @@ export class Redemption implements I_Redemptions {
         this.id = id;
         this.user_id = user_id;
         this.item_id = item_id;
+        this.status = status;
         this.amount = amount;
         this.created_at = created_at;
     }
@@ -54,6 +58,7 @@ export class Redemption implements I_Redemptions {
                 id,
                 user_id: this.user_id,
                 item_id: this.item_id,
+                status: false,
                 amount: this.amount,
             }
 
@@ -95,6 +100,27 @@ export class Redemption implements I_Redemptions {
                     }
                     resolve(successReturn);
                 }
+            })
+        })
+    }
+
+    update() {
+        return new Promise((resolve, reject) => {
+            const SQL = "UPDATE Redemptions SET status = ? WHERE id = ?";
+
+            const errReturn = {
+                status: false,
+                message: "兌換處理失敗",
+            };
+
+            const successReturn = {
+                status: true,
+                message: "兌換處理完成",
+            };
+
+            db.query(SQL, [this.id], (err, result) => {
+                if (err) reject(errReturn);
+                else resolve(successReturn);
             })
         })
     }

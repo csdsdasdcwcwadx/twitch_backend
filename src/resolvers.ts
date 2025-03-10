@@ -137,10 +137,24 @@ const resolvers = {
     Redemption: {
         item: async (redemption: I_Redemptions) => {
             const itemModel = new Items(redemption.item_id);
+
             try {
                 const items = await itemModel.getItems(false);
                 if (items.status) {
                     return items.iteminfo[0];
+                }
+                throw new Error('error');
+            } catch(e) {
+                return [];
+            }
+        },
+        user: async (redemption: I_Redemptions) => {
+            const userModel = new Users(redemption.user_id);
+
+            try {
+                const users = await userModel.getUsers();
+                if (users.status) {
+                    return users.userinfo[0];
                 }
                 throw new Error('error');
             } catch(e) {
