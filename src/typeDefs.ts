@@ -46,8 +46,9 @@ const typeDefs = `
         id: String
         amount: Int
         created_at: String
-        item: Item
         status: Boolean
+        item: Item
+        user: User
     }
 
     type Query {

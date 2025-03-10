@@ -22,7 +22,7 @@ const exchange = async (req: Request, res: Response) => {
                 userItemModel.amount = userItems.useriteminfo[0].amount! - (itemCount*(item.iteminfo[0].amount!) + amount%item.iteminfo[0].amount!);
                 const userItemResult = await userItemModel.updateUserItems(); // 刪除使用者持有的道具數量
 
-                const redemptionModel = new Redemption(undefined, userId, itemId, itemCount);
+                const redemptionModel = new Redemption(undefined, userId, itemId, undefined, itemCount);
                 const RedempResult = await redemptionModel.registry(); // 註冊兌換的商品
 
                 res.json(RedempResult);
@@ -38,6 +38,19 @@ const exchange = async (req: Request, res: Response) => {
     }
 }
 
+const updateStatus = async (req: Request, res: Response) => {
+    const { redemptionId, status } = req.body;
+    const redemptionModel = new Redemption(redemptionId, undefined, undefined, status);
+
+    try {
+        const result = await redemptionModel.update();
+        res.json(result);
+    } catch (e) {
+        res.json(e);
+    }
+}
+
 export {
     exchange,
+    updateStatus,
 }
