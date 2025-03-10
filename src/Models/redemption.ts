@@ -75,9 +75,9 @@ export class Redemption implements I_Redemptions {
 
     getRedemptions(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            let SQL = 'SELECT * FROM Redemptions WHERE user_id = ?';
+            let SQL = 'SELECT * FROM Redemptions WHERE user_id = ? ORDER BY created_at DESC';
             if (!this.user_id) {
-                SQL = 'SELECT * FROM Redemptions GROUP BY user_id';
+                SQL = 'SELECT * FROM Redemptions ORDER BY created_at DESC';
             }
 
             const errorReturn: GetAllErrorResponse = {

@@ -215,6 +215,7 @@ export const initializeDatabase = (connection: PoolConnection) => {
             id VARCHAR(12) PRIMARY KEY,
             user_id VARCHAR(12) NOT NULL,
             item_id VARCHAR(12) NOT NULL,
+            status TINYINT(1) DEFAULT 0,
             amount INT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,

@@ -78,8 +78,8 @@ export class Items implements I_Items {
 
     getItems(all = true): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            let SQL = "SELECT * from Items";
-            if (!all) SQL = "SELECT * from Items WHERE id = ?";
+            let SQL = "SELECT * from Items ORDER BY created_at DESC";
+            if (!all) SQL = "SELECT * from Items WHERE id = ? ORDER BY created_at DESC";
 
             const errorReturn = {
                 status: false,
