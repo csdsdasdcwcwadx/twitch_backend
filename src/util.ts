@@ -110,7 +110,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
     }
 
     async function handleNext() {
-        if (req.path.includes("/back")) {
+        if (req.path.includes("/back")) { // 是否有權限進入後台
             if (!req.userinfo.isAdmin) {
                 if (process.env.ENV === "prod") {
                     res.redirect(`${domainEnv}:3000/check`);
@@ -130,7 +130,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             }
             return;
         }
-        if (req.path === "/") {
+        if (req.path === "/") { // 是否從登入頁進入
             const redirectPage = req.userinfo.isAdmin ? 'back/check' : 'check';
             if (process.env.ENV === "prod") {
                 res.redirect(`${domainEnv}:3000/${redirectPage}`);
@@ -142,7 +142,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             }
             return;
         }
-        if (adminRoutes.includes(req.path)) {
+        if (adminRoutes.includes(req.path)) { // 是否是admin 專用的路徑
             const userModel = new Users(req.userinfo.id);
             const userinfo = await userModel.getUsers();
 
@@ -165,7 +165,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
                 return;
             }
         }
-        if (frontPages.includes(req.path)) {
+        if (frontPages.includes(req.path)) { // 每次進入前端頁面都要檢查
             if (process.env.ENV !== "prod") {
                 res.json({
                     status: true,

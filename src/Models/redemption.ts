@@ -22,6 +22,12 @@ interface GetAllErrorResponse {
     message: string;
 }
 
+interface GetPages {
+    status: true;
+    message: string;
+    pages: number;
+}
+
 type GetAllResponse = GetAllSuccessResponse | GetAllErrorResponse;
 
 export class Redemption implements I_Redemptions {
@@ -78,11 +84,15 @@ export class Redemption implements I_Redemptions {
         })
     }
 
-    getRedemptions(): Promise<GetAllResponse> {
+    getRedemptions(page = 1, pageSize = 10): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            let SQL = 'SELECT * FROM Redemptions WHERE user_id = ? ORDER BY created_at DESC';
+            const offset = (page - 1) * pageSize; // 計算偏移量
+            let SQL = 'SELECT * FROM Redemptions WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
+            let params: (number | string)[] = [pageSize, offset];
+
             if (!this.user_id) {
-                SQL = 'SELECT * FROM Redemptions ORDER BY created_at DESC';
+                SQL = 'SELECT * FROM Redemptions ORDER BY created_at DESC LIMIT ? OFFSET ?';
+                params = [this.user_id!, pageSize, offset];
             }
 
             const errorReturn: GetAllErrorResponse = {
@@ -90,7 +100,7 @@ export class Redemption implements I_Redemptions {
                 message: '取得兌換道具失敗',
             };
 
-            db.query(SQL, [this.user_id], (err, result) => {
+            db.query(SQL, params, (err, result) => {
                 if (err) reject(errorReturn);
                 else {
                     const successReturn = {
@@ -121,6 +131,32 @@ export class Redemption implements I_Redemptions {
             db.query(SQL, [this.status, this.id], (err, result) => {
                 if (err) reject(errReturn);
                 else resolve(successReturn);
+            })
+        })
+    }
+
+    getPages(pageSize = 10): Promise<GetAllErrorResponse | GetPages> {
+        return new Promise((resolve, reject) => {
+            let SQL = 'SELECT CEIL(COUNT(*) / ?) AS total FROM Redemptions WHERE user_id = ? ORDER BY created_at DESC';
+            if (!this.user_id) {
+                SQL = 'SELECT CEIL(COUNT(*) / ?) AS total FROM Redemptions ORDER BY created_at DESC';
+            }
+
+            const errorReturn = {
+                status: false,
+                message: "取得頁數失敗",
+            };
+
+            db.query(SQL, [pageSize, this.user_id], (err, result: RowDataPacket[]) => {
+                if (err) reject(errorReturn);
+                else {
+                    const successReturn = {
+                        status: true,
+                        message: "取得頁數成功",
+                        pages: result[0] ? result[0].total : 0,
+                    }
+                    resolve(successReturn);
+                }
             })
         })
     }
