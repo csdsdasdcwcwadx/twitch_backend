@@ -24,10 +24,13 @@ const resolvers = {
         getUsers: async (root: any, args: any, context: {token: I_Users}) => {
             return context.token;
         },
-        getItems: async (root: any, args: any, context: {token: I_Users}) => {
+        getItems: async (root: any, args: { page?: number, pageSize?: number }, context: {token: I_Users}) => {
             const itemModel = new Items();
+            const page = args.page || 1; // 預設第 1 頁
+            const pagesize = args.pageSize || 10;
+
             try {
-                const items = await itemModel.getItems();
+                const items = await itemModel.getItems(true, page, pagesize);
                 if (items.status) {
                     return items.iteminfo;
                 }
@@ -61,6 +64,34 @@ const resolvers = {
                 throw new Error('error');
             } catch (e) {
                 return [];
+            }
+        },
+        getItemPages: async (root: any, args: { pageSize?: number }, context: {token: I_Users}) => {
+            const itemModel = new Items();
+            const pagesize = args.pageSize || 10;
+
+            try {
+                const items = await itemModel.getPages(true, pagesize);
+                if (items.status) {
+                    return items.pages;
+                }
+                throw new Error('error');
+            } catch (e) {
+                return 0;
+            }
+        },
+        getRedemptionPages: async (root: any, args: { pageSize?: number }, context: {token: I_Users}) => {
+            const itemModel = new Redemption();
+            const pagesize = args.pageSize || 10;
+
+            try {
+                const redemptions = await itemModel.getPages(pagesize);
+                if (redemptions.status) {
+                    return redemptions.pages;
+                }
+                throw new Error('error');
+            } catch (e) {
+                return 0;
             }
         }
     },

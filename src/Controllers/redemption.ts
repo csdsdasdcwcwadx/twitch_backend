@@ -19,7 +19,7 @@ const exchange = async (req: Request, res: Response) => {
 
             // 代表使用者持有的數量大於請求的數量
             if (userItems.useriteminfo[0].amount! >= amount) {
-                userItemModel.amount = userItems.useriteminfo[0].amount! - (itemCount*(item.iteminfo[0].amount!) + amount%item.iteminfo[0].amount!);
+                userItemModel.amount = userItems.useriteminfo[0].amount! - (itemCount * (item.iteminfo[0].amount!) + amount % item.iteminfo[0].amount!);
                 const userItemResult = await userItemModel.updateUserItems(); // 刪除使用者持有的道具數量
 
                 const redemptionModel = new Redemption(undefined, userId, itemId, undefined, itemCount);

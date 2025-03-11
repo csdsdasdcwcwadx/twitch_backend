@@ -54,9 +54,11 @@ const typeDefs = `
     type Query {
         getChecks: [Check]
         getUsers: User
-        getItems: [Item]
+        getItems(page: Int, pageSize: Int): [Item]
         getAllUsers: [User]
-        getRedemptions: [Redemption]
+        getRedemptions(page: Int, pageSize: Int): [Redemption]
+        getItemPages(pageSize: Int): Int
+        getRedemptionPages(pageSize: Int): Int
     }
 `;
 

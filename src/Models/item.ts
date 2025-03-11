@@ -1,5 +1,6 @@
 import db from '../migration';
 import { v4 as uuidv4 } from 'uuid';
+import { RowDataPacket } from 'mysql2';
 
 export interface I_Items {
     id?: string;
@@ -19,6 +20,12 @@ interface GetAllSuccessResponse {
 interface GetAllErrorResponse {
     status: false;
     message: string;
+}
+
+interface GetPages {
+    status: true;
+    message: string;
+    pages: number;
 }
 
 type GetAllResponse = GetAllSuccessResponse | GetAllErrorResponse;
@@ -76,27 +83,33 @@ export class Items implements I_Items {
         })
     }
 
-    getItems(all = true): Promise<GetAllResponse> {
+    getItems(all = true, page = 1, pageSize = 10): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            let SQL = "SELECT * from Items ORDER BY created_at DESC";
-            if (!all) SQL = "SELECT * from Items WHERE id = ? ORDER BY created_at DESC";
+            const offset = (page - 1) * pageSize; // 計算偏移量
+            let SQL = "SELECT * FROM Items ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            let params: (number | string)[] = [pageSize, offset];
+    
+            if (!all) {
+                SQL = "SELECT * FROM Items WHERE id = ?";
+                params = [this.id!];
+            }
 
             const errorReturn = {
                 status: false,
                 message: "取得道具失敗",
             };
 
-            db.query(SQL, [this.id], (err, result) => {
+            db.query(SQL, params, (err, result) => {
                 if (err) reject(errorReturn);
                 else {
                     const successReturn = {
                         status: true,
                         message: "取得道具成功",
                         iteminfo: result as I_Items[],
-                    }
+                    };
                     resolve(successReturn);
                 }
-            })
+            });
         })
     }
 
@@ -148,6 +161,33 @@ export class Items implements I_Items {
 
                 if(err) reject(errorReturn);
                 else resolve(successReturn);
+            })
+        })
+    }
+
+    getPages (all = true, pageSize = 10): Promise<GetAllErrorResponse | GetPages> {
+        return new Promise((resolve, reject) => {
+
+            let SQL = "SELECT CEIL(COUNT(*) / ?) AS total FROM Items ORDER BY created_at DESC";
+            if (!all) {
+                SQL = "SELECT CEIL(COUNT(*) / ?) AS total FROM Items WHERE id = ? ORDER BY created_at DESC";
+            }
+
+            const errorReturn = {
+                status: false,
+                message: "取得頁數失敗",
+            };
+
+            db.query(SQL, [pageSize, this.id], (err, result: RowDataPacket[]) => {
+                if (err) reject(errorReturn);
+                else {
+                    const successReturn = {
+                        status: true,
+                        message: "取得頁數成功",
+                        pages: result[0] ? result[0].total : 0,
+                    }
+                    resolve(successReturn);
+                }
             })
         })
     }
