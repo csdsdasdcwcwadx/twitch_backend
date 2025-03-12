@@ -14,7 +14,7 @@ import userCheckRoutes from './Routers/userCheck';
 import userItemRoutes from './Routers/userItems';
 import redempRoutes from './Routers/redemption';
 
-import { authMiddleWare, initializeDatabase } from "./util";
+import { authMiddleWare, initializeDatabase, domainEnv } from "./util";
 import cookieParser from 'cookie-parser';
 import db from "./migration";
 import { I_Users } from "./Models/user";
@@ -61,6 +61,16 @@ app.use('/twitch/item', itemRoutes);
 app.use('/twitch/usercheck', userCheckRoutes);
 app.use('/twitch/useritem', userItemRoutes);
 app.use('/twitch/redemp', redempRoutes);
+
+app.use('*', (req, res) => {
+  if (process.env.ENV === "prod") res.redirect(`${domainEnv}:3000`);
+  else {
+      res.json({
+          status: false,
+          href: `${domainEnv}:3000`,
+      })
+  }
+});
 
 // 啟動 GraphQL Server 並與 Express 整合
 (async () => {
