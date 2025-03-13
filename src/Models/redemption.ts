@@ -88,11 +88,11 @@ export class Redemption implements I_Redemptions {
         return new Promise((resolve, reject) => {
             const offset = (page - 1) * pageSize; // 計算偏移量
             let SQL = 'SELECT * FROM Redemptions WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
-            let params: (number | string)[] = [pageSize, offset];
+            let params: (number | string)[] = [this.user_id!, pageSize, offset];
 
             if (!this.user_id) {
                 SQL = 'SELECT * FROM Redemptions ORDER BY created_at DESC LIMIT ? OFFSET ?';
-                params = [this.user_id!, pageSize, offset];
+                params = [pageSize, offset];
             }
 
             const errorReturn: GetAllErrorResponse = {

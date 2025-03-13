@@ -55,9 +55,11 @@ const resolvers = {
         getRedemptions: async (root: any, args: any, context: {token: I_Users}) => {
             const userID = context.token.id;
             const redemptionModel = new Redemption(undefined, context.token.isAdmin ? undefined : userID);
+            const page = args.page || 1; // 預設第 1 頁
+            const pagesize = args.pageSize || 10;
 
             try {
-                const redemptionList = await redemptionModel.getRedemptions();
+                const redemptionList = await redemptionModel.getRedemptions(page, pagesize);
                 if (redemptionList.status) {
                     return redemptionList.redemptioninfo;
                 }

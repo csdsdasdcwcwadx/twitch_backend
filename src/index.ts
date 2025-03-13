@@ -62,16 +62,6 @@ app.use('/twitch/usercheck', userCheckRoutes);
 app.use('/twitch/useritem', userItemRoutes);
 app.use('/twitch/redemp', redempRoutes);
 
-app.use('*', (req, res) => {
-  if (process.env.ENV === "prod") res.redirect(`${domainEnv}:3000`);
-  else {
-      res.json({
-          status: false,
-          href: `${domainEnv}:3000`,
-      })
-  }
-});
-
 // 啟動 GraphQL Server 並與 Express 整合
 (async () => {
   await apolloServer.start();
@@ -82,6 +72,16 @@ app.use('*', (req, res) => {
       token: req.userinfo,
     }),
   }));
+
+  app.use('*', (req, res) => {
+    if (process.env.ENV === "prod") res.redirect(`${domainEnv}:3000`);
+    else {
+        res.json({
+            status: false,
+            href: `${domainEnv}:3000`,
+        })
+    }
+  });
 
   // 啟動伺服器
   const PORT = process.env.PORT || 4000;
