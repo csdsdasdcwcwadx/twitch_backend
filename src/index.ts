@@ -14,7 +14,7 @@ import userCheckRoutes from './Routers/userCheck';
 import userItemRoutes from './Routers/userItems';
 import redempRoutes from './Routers/redemption';
 
-import { authMiddleWare, initializeDatabase } from "./util";
+import { authMiddleWare, initializeDatabase, domainEnv } from "./util";
 import cookieParser from 'cookie-parser';
 import db from "./migration";
 import { I_Users } from "./Models/user";
@@ -72,6 +72,16 @@ app.use('/twitch/redemp', redempRoutes);
       token: req.userinfo,
     }),
   }));
+
+  app.use('*', (req, res) => {
+    if (process.env.ENV === "prod") res.redirect(`${domainEnv}:3000`);
+    else {
+        res.json({
+            status: false,
+            href: `${domainEnv}:3000`,
+        })
+    }
+  });
 
   // 啟動伺服器
   const PORT = process.env.PORT || 4000;
