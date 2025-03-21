@@ -271,4 +271,17 @@ export const deleteImage = (removefile: string) => {
     if(fs.existsSync(removefilePath)) {
         fs.unlinkSync(removefilePath);
     }
-}
+};
+
+export const createDatabase = (connection: PoolConnection) => {
+    const dbName = "twitch";
+
+    connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`, (err, results) => {
+        if (err) {
+          console.error('Failed to create database:', err);
+        } else {
+          console.log(`Database ${dbName} created successfully or already exists.`);
+        }
+        connection.release();
+    });
+};
