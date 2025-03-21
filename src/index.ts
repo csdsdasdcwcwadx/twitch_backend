@@ -14,7 +14,7 @@ import userCheckRoutes from './Routers/userCheck';
 import userItemRoutes from './Routers/userItems';
 import redempRoutes from './Routers/redemption';
 
-import { authMiddleWare, initializeDatabase, domainEnv } from "./util";
+import { authMiddleWare, initializeDatabase, domainEnv, createDatabase } from "./util";
 import cookieParser from 'cookie-parser';
 import db from "./migration";
 import { I_Users } from "./Models/user";
@@ -35,6 +35,7 @@ db.getConnection((err, connection) => {
       throw err;
   } else {
       console.log('Connected to MySQL server.');
+      createDatabase(connection);
       initializeDatabase(connection); // 初始化資料庫
   }
 });
