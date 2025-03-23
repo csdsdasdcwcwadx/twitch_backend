@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { PoolConnection } from 'mysql2';
 import { I_Users, Users } from './Models/user';
+import db from './migration';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
@@ -178,74 +179,6 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
     }
 };
 
-export const initializeDatabase = (connection: PoolConnection) => {
-    const createUserTableQuery = `
-        CREATE TABLE IF NOT EXISTS Users (
-            id VARCHAR(12) PRIMARY KEY,
-            twitch_id VARCHAR(20) NOT NULL,
-            login VARCHAR(20) NOT NULL,
-            name VARCHAR(50) NOT NULL,
-            email VARCHAR(100) NOT NULL,
-            profile_image VARCHAR(100),
-            isAdmin TINYINT(1) DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS Items (
-            id VARCHAR(12) PRIMARY KEY,
-            name VARCHAR(20) NOT NULL,
-            image VARCHAR(100),
-            description VARCHAR(100),
-            type VARCHAR(20),
-            amount INT DEFAULT 1,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS Checks (
-            id VARCHAR(12) PRIMARY KEY,
-            passcode VARCHAR(30),
-            streaming TINYINT(1) DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS UserChecks (
-            user_id VARCHAR(12),
-            check_id VARCHAR(12),
-            checked TINYINT(1) DEFAULT 0,
-            PRIMARY KEY (user_id, check_id),
-            FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
-            FOREIGN KEY (check_id) REFERENCES Checks(id) ON DELETE CASCADE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS UserItems (
-            user_id VARCHAR(12),
-            item_id VARCHAR(12),
-            amount INT,
-            PRIMARY KEY (user_id, item_id),
-            FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
-            FOREIGN KEY (item_id) REFERENCES Items(id) ON DELETE CASCADE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE IF NOT EXISTS Redemptions (
-            id VARCHAR(12) PRIMARY KEY,
-            user_id VARCHAR(12) NOT NULL,
-            item_id VARCHAR(12) NOT NULL,
-            status TINYINT(1) DEFAULT 0,
-            amount INT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
-            FOREIGN KEY (item_id) REFERENCES Items(id) ON DELETE CASCADE
-        );
-    `
-
-    connection.query(createUserTableQuery, (err) => {
-        if (err) {
-            console.error('Failed to create Users table:', err);
-            throw err;
-        } else {
-            console.log('tables are ready.');
-        }
-        connection.release(); // 釋放連接
-    });
-};
-
 export const uploadImage = (imageBuffer: Buffer, filename: string): string => {
     const imagePath = './Images';
 
@@ -271,17 +204,4 @@ export const deleteImage = (removefile: string) => {
     if(fs.existsSync(removefilePath)) {
         fs.unlinkSync(removefilePath);
     }
-};
-
-export const createDatabase = (connection: PoolConnection) => {
-    const dbName = "twitch";
-
-    connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`, (err, results) => {
-        if (err) {
-          console.error('Failed to create database:', err);
-        } else {
-          console.log(`Database ${dbName} created successfully or already exists.`);
-        }
-        connection.release();
-    });
 };
