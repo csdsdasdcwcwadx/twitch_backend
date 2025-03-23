@@ -4,6 +4,7 @@ import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -14,10 +15,9 @@ import userCheckRoutes from './Routers/userCheck';
 import userItemRoutes from './Routers/userItems';
 import redempRoutes from './Routers/redemption';
 
-import { authMiddleWare, initializeDatabase, domainEnv, createDatabase } from "./util";
-import cookieParser from 'cookie-parser';
-import db from "./migration";
+import { authMiddleWare, domainEnv } from "./util";
 import { I_Users } from "./Models/user";
+import { initializeDataBase } from './migration';
 
 declare global {
   namespace Express {
@@ -28,17 +28,7 @@ declare global {
 }
 
 dotenv.config();
-
-db.getConnection((err, connection) => {
-  if (err) {
-      console.error('Database connection failed:', err);
-      throw err;
-  } else {
-      console.log('Connected to MySQL server.');
-      createDatabase(connection);
-      initializeDatabase(connection); // 初始化資料庫
-  }
-});
+initializeDataBase();
 
 const apolloServer = new ApolloServer({
   typeDefs,
