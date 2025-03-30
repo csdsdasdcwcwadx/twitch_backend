@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
-import { ACCESS_SECRET_KEY, REFRESH_SECRET_KEY, accessTime, refreshTime, cookieDomain, domainEnv } from '../util';
+import { ACCESS_SECRET_KEY, REFRESH_SECRET_KEY, accessTime, refreshTime, cookieDomain } from '../util';
 import jwt from 'jsonwebtoken';
 import { Users } from '../Models/user';
 
 const login = async (req: Request, res: Response) => {
     const clientId = process.env.TWITCH_CLIENT_ID;
     const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-    const redirectUri = `${domainEnv}:${process.env.PORT}/twitch/member/login`;
+    const redirectUri = `${process.env.APP_HOST}:${process.env.PORT}/twitch/member/login`;
   
     const { code } = req.query;
     if (!code) {
@@ -64,9 +64,9 @@ const login = async (req: Request, res: Response) => {
                 domain: cookieDomain,
             })
             if (result.userinfo[0].isAdmin) {
-                res.redirect(`${domainEnv}:3000/back/check`);
+                res.redirect(`${process.env.APP_HOST}:${process.env.FRONT_PORT}/back/check`);
             } else {
-                res.redirect(`${domainEnv}:3000/check`);
+                res.redirect(`${process.env.APP_HOST}:${process.env.FRONT_PORT}/check`);
             }
         }
 
@@ -97,7 +97,7 @@ const logout = async (req: Request, res: Response) => {
                 secure: true,
                 domain: cookieDomain,
             });
-            res.redirect(`${domainEnv}:3000`);
+            res.redirect(`${process.env.APP_HOST}:${process.env.FRONT_PORT}`);
             return;   
         }
         throw new Error("登出失敗");

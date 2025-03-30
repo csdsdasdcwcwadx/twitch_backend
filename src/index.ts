@@ -15,7 +15,7 @@ import userCheckRoutes from './Routers/userCheck';
 import userItemRoutes from './Routers/userItems';
 import redempRoutes from './Routers/redemption';
 
-import { authMiddleWare, domainEnv } from "./util";
+import { authMiddleWare } from "./util";
 import { I_Users } from "./Models/user";
 import { initializeDataBase } from './migration';
 
@@ -42,7 +42,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(authMiddleWare);
-app.use('/twitch', apiRouter);
+if (process.env.ENV === "dev") app.use('/twitch', apiRouter);
 
 // 圖片路徑
 apiRouter.use('/item/images', express.static(path.join(__dirname, 'Images')));
@@ -67,11 +67,11 @@ apiRouter.use('/redemp', redempRoutes);
   }));
 
   app.use('*', (req, res) => {
-    if (process.env.ENV === "prod") res.redirect(`${domainEnv}:3000`);
+    if (process.env.ENV === "prod") res.redirect(`${process.env.APP_HOST}:${process.env.FRONT_PORT}`);
     else {
         res.json({
             status: false,
-            href: `${domainEnv}:3000`,
+            href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}`,
         })
     }
   });

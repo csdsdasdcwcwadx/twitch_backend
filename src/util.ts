@@ -13,7 +13,6 @@ export const REFRESH_SECRET_KEY = uuidv4();
 export const accessTime = '15m';
 export const refreshTime = '10h';
 
-export const domainEnv = process.env.ENV === 'prod' ? '' : 'http://localhost';
 export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
 
 export const adminRoutes = [
@@ -103,7 +102,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         });
         res.json({
             status: false,
-            href: `${domainEnv}:3000`,
+            href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}`,
         })
     }
 
@@ -112,7 +111,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             if (!req.userinfo.isAdmin) {
                 res.json({
                     status: true,
-                    href: `${domainEnv}:3000/check`,
+                    href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}/check`,
                 })
             } else {
                 res.json({
@@ -126,7 +125,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             const redirectPage = req.userinfo.isAdmin ? 'back/check' : 'check';
             res.json({
                 status: false,
-                href: `${domainEnv}:3000/${redirectPage}`,
+                href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}/${redirectPage}`,
             })
             return;
         }
@@ -144,7 +143,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             if (!req.userinfo.isAdmin) {
                 res.json({
                     status: false,
-                    href: `${domainEnv}:3000/check`,
+                    href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}/check`,
                 })
                 return;
             }
