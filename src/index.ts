@@ -36,29 +36,31 @@ const apolloServer = new ApolloServer({
 });
   
 const app = express();
+const apiRouter = express.Router();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(authMiddleWare);
+app.use('/twitch', apiRouter);
 
 // 圖片路徑
-app.use('/twitch/item/images', express.static(path.join(__dirname, 'Images')));
+apiRouter.use('/item/images', express.static(path.join(__dirname, 'Images')));
 
 // 一般 API
-app.use('/twitch/member', memberRoutes);
-app.use('/twitch/check', checkRoutes);
-app.use('/twitch/item', itemRoutes);
-app.use('/twitch/usercheck', userCheckRoutes);
-app.use('/twitch/useritem', userItemRoutes);
-app.use('/twitch/redemp', redempRoutes);
+apiRouter.use('/member', memberRoutes);
+apiRouter.use('/check', checkRoutes);
+apiRouter.use('/item', itemRoutes);
+apiRouter.use('/usercheck', userCheckRoutes);
+apiRouter.use('/useritem', userItemRoutes);
+apiRouter.use('/redemp', redempRoutes);
 
 // 啟動 GraphQL Server 並與 Express 整合
 (async () => {
   await apolloServer.start();
 
   // 將 GraphQL 中介層加入 Express
-  app.use('/graphql', expressMiddleware(apolloServer, {
+  apiRouter.use('/graphql', expressMiddleware(apolloServer, {
     context: async ({ req, res }) => ({
       token: req.userinfo,
     }),
