@@ -101,46 +101,33 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             secure: true,
             domain: cookieDomain,
         });
-        if (process.env.ENV === "prod") res.redirect(`${domainEnv}:3000`);
-        else {
-            res.json({
-                status: false,
-                href: `${domainEnv}:3000`,
-            })
-        }
+        res.json({
+            status: false,
+            href: `${domainEnv}:3000`,
+        })
     }
 
     async function handleNext() {
         if (req.path.includes("/back")) { // 是否有權限進入後台
             if (!req.userinfo.isAdmin) {
-                if (process.env.ENV === "prod") {
-                    res.redirect(`${domainEnv}:3000/check`);
-                } else {
-                    res.json({
-                        status: true,
-                        href: `${domainEnv}:3000/check`,
-                    })
-                }
+                res.json({
+                    status: true,
+                    href: `${domainEnv}:3000/check`,
+                })
             } else {
-                if (process.env.ENV !== "prod") {
-                    res.json({
-                        status: true,
-                        message: "admin 登入成功",
-                    })
-                }
+                res.json({
+                    status: true,
+                    message: "admin 登入成功",
+                })
             }
             return;
         }
         if (req.path === "/") { // 是否從登入頁進入
             const redirectPage = req.userinfo.isAdmin ? 'back/check' : 'check';
-            if (process.env.ENV === "prod") {
-                res.redirect(`${domainEnv}:3000/${redirectPage}`);
-            } else {
-                res.json({
-                    status: false,
-                    href: `${domainEnv}:3000/${redirectPage}`,
-                })
-            }
+            res.json({
+                status: false,
+                href: `${domainEnv}:3000/${redirectPage}`,
+            })
             return;
         }
         if (adminRoutes.includes(req.path)) { // 是否是admin 專用的路徑
@@ -155,25 +142,19 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             }
 
             if (!req.userinfo.isAdmin) {
-                if (process.env.ENV === "prod") {
-                    res.redirect(`${domainEnv}:3000/check`);
-                } else {
-                    res.json({
-                        status: false,
-                        href: `${domainEnv}:3000/check`,
-                    })
-                }
+                res.json({
+                    status: false,
+                    href: `${domainEnv}:3000/check`,
+                })
                 return;
             }
         }
         if (frontPages.includes(req.path)) { // 每次進入前端頁面都要檢查
-            if (process.env.ENV !== "prod") {
-                res.json({
-                    status: true,
-                    message: "成功進入此頁",
-                });
-                return;
-            }
+            res.json({
+                status: true,
+                message: `成功進入${req.path}`,
+            });
+            return;
         }
         next();
     }
