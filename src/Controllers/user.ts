@@ -5,9 +5,11 @@ import jwt from 'jsonwebtoken';
 import { Users } from '../Models/user';
 
 const login = async (req: Request, res: Response) => {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
     const clientId = process.env.TWITCH_CLIENT_ID;
     const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-    const redirectUri = `${process.env.APP_HOST}:${process.env.PORT}/twitch/member/login`;
+    const redirectUri = `${baseUrl}/member/login`;
   
     const { code } = req.query;
     if (!code) {
@@ -64,9 +66,9 @@ const login = async (req: Request, res: Response) => {
                 domain: cookieDomain,
             })
             if (result.userinfo[0].isAdmin) {
-                res.redirect(`${process.env.APP_HOST}:${process.env.FRONT_PORT}/back/check`);
+                res.redirect(`${process.env.APP_HOST}/back/check`);
             } else {
-                res.redirect(`${process.env.APP_HOST}:${process.env.FRONT_PORT}/check`);
+                res.redirect(`${process.env.APP_HOST}/check`);
             }
         }
 
@@ -97,8 +99,8 @@ const logout = async (req: Request, res: Response) => {
                 secure: true,
                 domain: cookieDomain,
             });
-            res.redirect(`${process.env.APP_HOST}:${process.env.FRONT_PORT}`);
-            return;   
+            res.redirect(`${process.env.APP_HOST}`);
+            return;
         }
         throw new Error("登出失敗");
     } catch(e) {

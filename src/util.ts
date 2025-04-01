@@ -17,24 +17,25 @@ export const cookieDomain = process.env.ENV === 'prod' ? '' : '';
 
 export const adminRoutes = [
     // check
-    '/twitch/check/addcheck',
-    '/twitch/check/updatecheckstatus',
+    '/check/addcheck',
+    '/check/updatecheckstatus',
     // item
-    '/twitch/item/additem',
-    '/twitch/item/deleteitem',
+    '/item/additem',
+    '/item/deleteitem',
     // useritem
-    '/twitch/useritem/ownitem',
+    '/useritem/ownitem',
     // redemption
-    '/twitch/redemp/update',
+    '/redemp/update',
 ];
 
 export const frontPages = ['/check', '/game', '/pack', '/exchange'];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
+    console.log(`[API] ${req.method} ${req.path}`);
+
     const accessToken: string = req.cookies.access;
     const refreshToken: string = req.cookies.refresh;
-
-    if (req.path === '/twitch/member/login') {
+    if (req.path === '/member/login') {
         next();
         return;
     }
@@ -102,7 +103,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
         });
         res.json({
             status: false,
-            href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}`,
+            href: `${process.env.APP_HOST}`,
         })
     }
 
@@ -111,7 +112,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             if (!req.userinfo.isAdmin) {
                 res.json({
                     status: true,
-                    href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}/check`,
+                    href: `${process.env.APP_HOST}/check`,
                 })
             } else {
                 res.json({
@@ -125,7 +126,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             const redirectPage = req.userinfo.isAdmin ? 'back/check' : 'check';
             res.json({
                 status: false,
-                href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}/${redirectPage}`,
+                href: `${process.env.APP_HOST}/${redirectPage}`,
             })
             return;
         }
@@ -143,7 +144,7 @@ export const authMiddleWare = async (req: Request, res: Response, next: Function
             if (!req.userinfo.isAdmin) {
                 res.json({
                     status: false,
-                    href: `${process.env.APP_HOST}:${process.env.FRONT_PORT}/check`,
+                    href: `${process.env.APP_HOST}/check`,
                 })
                 return;
             }
