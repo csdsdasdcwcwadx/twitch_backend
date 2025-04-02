@@ -73,10 +73,9 @@ export class Users implements I_Users {
                 message: '會員註冊成功',
                 userinfo: [post],
             };
-            const SQL = 'SELECT * FROM USERS WHERE twitch_id = ?';
+            const SQL = 'SELECT * FROM Users WHERE twitch_id = ?';
             db.query(SQL, this.twitch_id, (err, result: RowDataPacket[]) => {
                 if (err) {
-                    console.log("@@@1")
                     reject(errorReturn);
                 }
                 else {
@@ -92,7 +91,6 @@ export class Users implements I_Users {
                             post.isAdmin = result[0].isAdmin;
 
                             if(err) {
-                                console.log("@@@2")
                                 reject(errorReturn);
                             }
                             else resolve(successReturn);
@@ -103,7 +101,6 @@ export class Users implements I_Users {
                         post.id = id;
                         db.query(SQL, post, (err, _result) => {
                             if(err) {
-                                console.log("@@@3")
                                 reject(errorReturn);
                             }
                             else resolve(successReturn);
@@ -116,7 +113,7 @@ export class Users implements I_Users {
 
     getUsers(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            const SQL = 'SELECT * FROM users WHERE id = ?';
+            const SQL = 'SELECT * FROM Users WHERE id = ?';
             const errorReturn = {
                 status: false,
                 message: '取得用戶失敗',
@@ -138,7 +135,7 @@ export class Users implements I_Users {
 
     getAllUsers(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
-            const SQL = 'SELECT * FROM users WHERE isAdmin = 0';
+            const SQL = 'SELECT * FROM Users WHERE isAdmin = 0';
             const errorReturn = {
                 status: false,
                 message: '取得用戶失敗',
