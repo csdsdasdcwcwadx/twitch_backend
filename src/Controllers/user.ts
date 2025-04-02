@@ -9,7 +9,7 @@ const login = async (req: Request, res: Response) => {
 
     const clientId = process.env.TWITCH_CLIENT_ID;
     const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-    const redirectUri = `${baseUrl}${process.env.ENV === "prod" ? '/twitch' : ""}/member/login`;
+    const redirectUri = `${process.env.APP_HOST}${process.env.ENV === "prod" ? '/twitch' : "/api"}/member/login`;
   
     const { code } = req.query;
     if (!code) throw new Error("登入失敗");

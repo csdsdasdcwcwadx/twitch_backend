@@ -3,9 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { PoolConnection } from 'mysql2';
 import { I_Users, Users } from './Models/user';
-import db from './migration';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
