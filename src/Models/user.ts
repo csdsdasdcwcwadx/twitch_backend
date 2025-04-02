@@ -75,7 +75,10 @@ export class Users implements I_Users {
             };
             const SQL = 'SELECT * FROM USERS WHERE twitch_id = ?';
             db.query(SQL, this.twitch_id, (err, result: RowDataPacket[]) => {
-                if (err) reject(errorReturn);
+                if (err) {
+                    console.log("@@@1")
+                    reject(errorReturn);
+                }
                 else {
                     if (result.length) {
                         // 既有 user 更新他的資料
@@ -88,7 +91,10 @@ export class Users implements I_Users {
                             post.id = result[0].id;
                             post.isAdmin = result[0].isAdmin;
 
-                            if(err) reject(errorReturn);
+                            if(err) {
+                                console.log("@@@2")
+                                reject(errorReturn);
+                            }
                             else resolve(successReturn);
                         })
                     } else {
@@ -96,7 +102,10 @@ export class Users implements I_Users {
                         const SQL = 'INSERT INTO Users SET ?';
                         post.id = id;
                         db.query(SQL, post, (err, _result) => {
-                            if(err) reject(errorReturn);
+                            if(err) {
+                                console.log("@@@3")
+                                reject(errorReturn);
+                            }
                             else resolve(successReturn);
                         })
                     }

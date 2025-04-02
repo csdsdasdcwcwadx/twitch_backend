@@ -5,16 +5,14 @@ import jwt from 'jsonwebtoken';
 import { Users } from '../Models/user';
 
 const login = async (req: Request, res: Response) => {
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = `${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}`;
 
     const clientId = process.env.TWITCH_CLIENT_ID;
     const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-    const redirectUri = `${baseUrl}/member/login`;
+    const redirectUri = `${baseUrl}${process.env.ENV === "prod" ? '/twitch' : ""}/member/login`;
   
     const { code } = req.query;
-    if (!code) {
-      return res.status(500).send("登入失敗");
-    }
+    if (!code) throw new Error("登入失敗");
   
     try {
         const tokenResponse = await axios.post("https://id.twitch.tv/oauth2/token", null, {

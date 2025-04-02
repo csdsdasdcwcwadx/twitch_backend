@@ -70,7 +70,7 @@ app.use('/redemp', redempRoutes);
 
   // 啟動伺服器
   const PORT = parseInt(process.env.PORT || '4000');
-  app.listen(PORT, '0.0.0.0',() => {
+  app.listen(PORT,() => {
     console.log(`Server started on port: ${PORT}`);
     console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
   });
