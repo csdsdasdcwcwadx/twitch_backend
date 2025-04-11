@@ -121,7 +121,7 @@ export class Checks implements I_Checks {
 
     updateStreaming() {
         return new Promise((resolve, reject) => {
-            const SQL = 'UPDATE checks SET streaming = ? WHERE id = ?';
+            const SQL = 'UPDATE Checks SET streaming = ? WHERE id = ?';
             const errorReturn: GetAllErrorResponse = {
                 status: false,
                 message: '更新簽到表狀態失敗',
