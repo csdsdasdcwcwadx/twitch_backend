@@ -21,6 +21,9 @@ const typeDefs = `
         name: String
         email: String
         profile_image: String
+        realname: String
+        address: String
+        phone: String
         isAdmin: Boolean
         created_at: String
     }
