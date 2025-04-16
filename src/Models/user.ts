@@ -96,7 +96,10 @@ export class Users implements I_Users {
                         
                         db.query(SQL, [post, result[0].id], (err, _result) => {
                             if(err) reject(errorReturn);
-                            else resolve(successReturn);
+                            else {
+                                successReturn.userinfo = result as [I_Users];
+                                resolve(successReturn);
+                            }
                         })
                     } else {
                         // 尚未使用過的 user 儲存他的欄位
