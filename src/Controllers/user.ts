@@ -109,7 +109,15 @@ const logout = async (req: Request, res: Response) => {
     }
 }
 
+const redirect = async (req: Request, res: Response) => {
+    const params = Object.entries(req.body).map(([key, value]) => {
+        return `${key}=${value}`;
+    })
+    res.redirect(`${req.body.TempVar}?${params.join('&')}`);
+}
+
 export {
     login,
     logout,
+    redirect,
 }
