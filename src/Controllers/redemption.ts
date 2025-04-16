@@ -1,14 +1,16 @@
 import { Items } from "../Models/item";
 import { Redemption } from "../Models/redemption";
+import { Users } from "../Models/user";
 import { UserItems } from "../Models/userItems";
 import { Request, Response } from 'express';
 
 const exchange = async (req: Request, res: Response) => {
-    const { itemId, amount } = req.body;
+    const { itemId, amount, realname, address, phone } = req.body;
     const userId = req.userinfo.id;
 
     const userItemModel = new UserItems(userId, itemId, amount);
     const ItemModels = new Items(itemId);
+    const userModel = new Users(userId, req.userinfo.twitch_id, undefined, undefined, undefined, undefined, realname, address, phone);
 
     try {
         const userItems = await userItemModel.getUserItems();
@@ -21,6 +23,7 @@ const exchange = async (req: Request, res: Response) => {
             if (userItems.useriteminfo[0].amount! >= amount) {
                 userItemModel.amount = userItems.useriteminfo[0].amount! - (itemCount * (item.iteminfo[0].amount!) + amount % item.iteminfo[0].amount!);
                 const userItemResult = await userItemModel.updateUserItems(); // 刪除使用者持有的道具數量
+                const userResult = await userModel.registry(); // 更新用戶 實際名稱、電話、寄件地址
 
                 const redemptionModel = new Redemption(undefined, userId, itemId, undefined, itemCount);
                 const RedempResult = await redemptionModel.registry(); // 註冊兌換的商品

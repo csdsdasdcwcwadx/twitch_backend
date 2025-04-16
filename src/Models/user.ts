@@ -9,6 +9,9 @@ export interface I_Users {
     name?: string;
     email?: string;
     profile_image?: string;
+    realname?: string;
+    address?: string;
+    phone?: string;
     isAdmin?: boolean;
 }
 
@@ -32,6 +35,9 @@ export class Users implements I_Users {
     name?: string;
     email?: string;
     profile_image?: string;
+    realname?: string;
+    address?: string;
+    phone?: string;
     isAdmin?: boolean;
 
     constructor(
@@ -41,6 +47,9 @@ export class Users implements I_Users {
         name?: string,
         email?: string,
         profile_image?: string,
+        realname?: string,
+        address?: string,
+        phone?: string,
         isAdmin?: boolean,
     ) {
         this.id = id;
@@ -49,21 +58,25 @@ export class Users implements I_Users {
         this.name = name;
         this.email = email;
         this.profile_image = profile_image;
+        this.realname = realname;
+        this.address = address;
+        this.phone = phone;
         this.isAdmin = isAdmin;
     }
 
     registry(): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
             const id = uuidv4().substring(0, 12);
-            const post: I_Users = {
-                id,
-                twitch_id: this.twitch_id,
-                login: this.login,
-                name: this.name,
-                email: this.email,
-                profile_image: this.profile_image,
-                isAdmin: false,
-            };
+            const post: Partial<I_Users> = {};
+
+            if (this.login !== undefined) post.login = this.login;
+            if (this.name !== undefined) post.name = this.name;
+            if (this.email !== undefined) post.email = this.email;
+            if (this.profile_image !== undefined) post.profile_image = this.profile_image;
+            if (this.realname !== undefined) post.realname = this.realname;
+            if (this.address !== undefined) post.address = this.address;
+            if (this.phone !== undefined) post.phone = this.phone;
+
             const errorReturn = {
                 status: false,
                 message: '會員註冊失敗',
@@ -75,24 +88,14 @@ export class Users implements I_Users {
             };
             const SQL = 'SELECT * FROM Users WHERE twitch_id = ?';
             db.query(SQL, this.twitch_id, (err, result: RowDataPacket[]) => {
-                if (err) {
-                    reject(errorReturn);
-                }
+                if (err) reject(errorReturn);
                 else {
                     if (result.length) {
                         // 既有 user 更新他的資料
                         const SQL = 'UPDATE Users SET ? WHERE id = ?';
                         
-                        delete post.id;
-                        delete post.isAdmin;
-
                         db.query(SQL, [post, result[0].id], (err, _result) => {
-                            post.id = result[0].id;
-                            post.isAdmin = result[0].isAdmin;
-
-                            if(err) {
-                                reject(errorReturn);
-                            }
+                            if(err) reject(errorReturn);
                             else resolve(successReturn);
                         })
                     } else {
@@ -100,9 +103,7 @@ export class Users implements I_Users {
                         const SQL = 'INSERT INTO Users SET ?';
                         post.id = id;
                         db.query(SQL, post, (err, _result) => {
-                            if(err) {
-                                reject(errorReturn);
-                            }
+                            if(err) reject(errorReturn);
                             else resolve(successReturn);
                         })
                     }

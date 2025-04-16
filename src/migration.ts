@@ -22,6 +22,10 @@ const db = mysql.createPool(options);
 export default db;
 
 const initializeTables = () => {
+    // ALTER TABLE Users
+    // ADD COLUMN realname VARCHAR(20),
+    // ADD COLUMN address VARCHAR(50),
+    // ADD COLUMN phone VARCHAR(20);
     const createUserTableQuery = `
         CREATE TABLE IF NOT EXISTS Users (
             id VARCHAR(12) PRIMARY KEY,
@@ -30,6 +34,9 @@ const initializeTables = () => {
             name VARCHAR(50) NOT NULL,
             email VARCHAR(100) NOT NULL,
             profile_image VARCHAR(100),
+            realname VARCHAR(20),
+            address VARCHAR(50),
+            phone VARCHAR(20),
             isAdmin TINYINT(1) DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
