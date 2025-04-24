@@ -69,7 +69,7 @@ export class Checks implements I_Checks {
         })
     }
 
-    getall(currentYear?: number, currentMonth?: number): Promise<GetAllResponse> {
+    getall(currentYear?: string, currentMonth?: string): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
             let SQL = 'SELECT * FROM Checks';
             if (currentMonth && currentYear) {
