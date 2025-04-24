@@ -55,7 +55,7 @@ const typeDefs = `
     }
 
     type Query {
-        getChecks: [Check]
+        getChecks(year: String, month: String): [Check]
         getUsers: User
         getItems(page: Int, pageSize: Int): [Item]
         getAllUsers: [User]

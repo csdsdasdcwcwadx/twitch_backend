@@ -7,12 +7,12 @@ import { I_Redemptions, Redemption } from "./Models/redemption";
 
 const resolvers = {
     Query: {
-        getChecks: async (root: any, args: any, context: any) => {
+        getChecks: async (root: any, args: { year?: string, month?: string }, context: any) => {
             const today = new Date();
             const checksModel = new Checks();
 
             try {
-                const checkList = await checksModel.getall(today.getFullYear(), today.getMonth() + 1);
+                const checkList = await checksModel.getall(args.year || today.getFullYear() + "", args.month || today.getMonth() + 1 + "");
                 if (checkList.status) {
                     return checkList.checkinfo;
                 }
