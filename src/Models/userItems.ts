@@ -56,13 +56,14 @@ export class UserItems implements I_UserItems {
                 if(err) reject(errorReturn);
                 else {
                     if (result.length) {
-                        const SQL = 'UPDATE UserItems SET ? WHERE user_id = ? AND item_id = ?';
-                        db.query(SQL, [post, this.user_id, this.item_id], (err, result) => {
+                        const SQL = 'UPDATE UserItems SET amount = GREATEST(amount + ?, 0) WHERE user_id = ? AND item_id = ?';
+                        db.query(SQL, [post.amount, post.user_id, post.item_id], (err, result) => {
                             if(err) reject(errorReturn);
                             else resolve(successReturn);
                         })
                     } else {
                         const SQL = 'INSERT INTO UserItems SET ?';
+                        if (post.amount !== undefined && post.amount < 0) post.amount = 0;
                         db.query(SQL, post, (err, result) => {
                             if(err) reject(errorReturn);
                             else resolve(successReturn);

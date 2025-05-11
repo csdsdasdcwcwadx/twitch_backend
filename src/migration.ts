@@ -46,7 +46,7 @@ const initializeTables = () => {
             image VARCHAR(100),
             description VARCHAR(100),
             type VARCHAR(20),
-            amount INT DEFAULT 1,
+            amount INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         CREATE TABLE IF NOT EXISTS Checks (
