@@ -54,7 +54,7 @@ export class Items implements I_Items {
         this.amount = amount;
     }
 
-    registry() {
+    registry () {
         return new Promise((resolve, reject) => {
             const id = uuidv4().substring(0, 12);
 
@@ -83,11 +83,14 @@ export class Items implements I_Items {
         })
     }
 
-    getItems(all = true, page = 1, pageSize = 10): Promise<GetAllResponse> {
+    getItems (all = true, page = 1, pageSize = 10, desc = true): Promise<GetAllResponse> {
         return new Promise((resolve, reject) => {
             const offset = (page - 1) * pageSize; // 計算偏移量
             let SQL = "SELECT * FROM Items ORDER BY created_at DESC LIMIT ? OFFSET ?";
             let params: (number | string)[] = [pageSize, offset];
+            if (!desc) {
+                SQL = "SELECT * FROM Items ORDER BY created_at ASC LIMIT ? OFFSET ?";
+            }
     
             if (!all) {
                 SQL = "SELECT * FROM Items WHERE id = ?";
@@ -113,7 +116,7 @@ export class Items implements I_Items {
         })
     }
 
-    updateItem() {
+    updateItem () {
         return new Promise((resolve, reject) => {
 
             const post: I_Items = {
