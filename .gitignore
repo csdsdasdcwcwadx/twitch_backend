@@ -1,4 +1,6 @@
 /node_modules
 /src/Images
 .env
+.DS_Store
 dist/
+keys/

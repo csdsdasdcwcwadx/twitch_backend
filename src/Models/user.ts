@@ -13,6 +13,7 @@ export interface I_Users {
     address?: string;
     phone?: string;
     isAdmin?: boolean;
+    isGaming?: boolean;
 }
 
 interface GetAllSuccessResponse {
@@ -39,6 +40,7 @@ export class Users implements I_Users {
     address?: string;
     phone?: string;
     isAdmin?: boolean;
+    isGaming?: boolean;
 
     constructor(
         id?: string,
@@ -51,6 +53,7 @@ export class Users implements I_Users {
         address?: string,
         phone?: string,
         isAdmin?: boolean,
+        isGaming?: boolean,
     ) {
         this.id = id;
         this.twitch_id = twitch_id;
@@ -62,6 +65,7 @@ export class Users implements I_Users {
         this.address = address;
         this.phone = phone;
         this.isAdmin = isAdmin;
+        this.isGaming = isGaming;
     }
 
     registry(): Promise<GetAllResponse> {

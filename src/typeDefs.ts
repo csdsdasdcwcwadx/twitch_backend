@@ -25,6 +25,7 @@ const typeDefs = `
         address: String
         phone: String
         isAdmin: Boolean
+        isGaming: Boolean
         created_at: String
     }
 

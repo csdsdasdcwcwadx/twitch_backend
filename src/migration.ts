@@ -26,6 +26,7 @@ const initializeTables = () => {
     // ADD COLUMN realname VARCHAR(20),
     // ADD COLUMN address VARCHAR(50),
     // ADD COLUMN phone VARCHAR(20);
+    // ADD COLUMN isGaming TINYINT(1);
     const createUserTableQuery = `
         CREATE TABLE IF NOT EXISTS Users (
             id VARCHAR(12) PRIMARY KEY,
@@ -37,6 +38,7 @@ const initializeTables = () => {
             realname VARCHAR(20),
             address VARCHAR(50),
             phone VARCHAR(20),
+            isGaming TINYINT(1) DEFAULT 0,
             isAdmin TINYINT(1) DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );

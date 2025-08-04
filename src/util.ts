@@ -4,9 +4,14 @@ import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { I_Users, Users } from './Models/user';
+import WebSocket from 'ws';
+import { IncomingMessage } from 'http';
+import * as cookie from 'cookie';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
+export const clientsQueue = new Set<WebSocket>();
+export const adminQueue = new Set<WebSocket>();
 
 export const accessTime = '15m';
 export const refreshTime = '10h';
@@ -183,4 +188,65 @@ export const deleteImage = (removefile: string) => {
     if(fs.existsSync(removefilePath)) {
         fs.unlinkSync(removefilePath);
     }
+};
+
+export const webSocketAuth = (ws: WebSocket, request: IncomingMessage) => {
+    try {
+        // cookie handle start
+        const cookieHeader = request.headers.cookie;
+        if (!cookieHeader) throw new Error("cannot access cookies correctly");
+        const cookies = cookie.parse(cookieHeader);
+
+        const accessToken: string = cookies.access || "";
+        const refreshToken: string = cookies.refresh || "";
+        if (!accessToken || !refreshToken) throw new Error('cannot find refresh token or access token');
+        // cookie handle end
+
+        // verify jwt auth
+        const userinfo = jwt.verify(accessToken, ACCESS_SECRET_KEY) as I_Users;
+        if (!userinfo.isAdmin) {
+            if (clientsQueue.size) throw new Error("websocket is being occupied");
+            if (!userinfo.isGaming) throw new Error("no gaming request");
+            clientsQueue.add(ws);
+        }
+        if (userinfo.isAdmin) adminQueue.add(ws);
+        ws.send(JSON.stringify({
+            type: E_WS_Type.MESSAGE,
+            payload: "connected successfully",
+        }));
+        (ws as any).userinfo = userinfo;
+        return userinfo;
+    } catch (e) {
+        ws.send(JSON.stringify({
+            type: E_WS_Type.MESSAGE,
+            payload: "fail to connect",
+        }));
+        ws.close();
+        return null;
+    }
+};
+
+export const websocketMessage = (ws: WebSocket) => {
+    ws.on('message', (msg) => {
+        for (const adminWS of adminQueue) {
+            if (adminWS.readyState === WebSocket.OPEN) {
+                adminWS.send(JSON.stringify({
+                    type: E_WS_Type.ACTION,
+                    payload: msg.toString(),
+                }));
+            }
+        }
+    })
+}
+
+export const websocketClose = (ws: WebSocket) => {
+    ws.on('close', () => {
+        clientsQueue.delete(ws);
+        adminQueue.delete(ws); // admin 斷線也清除
+    });
+}
+
+export enum E_WS_Type {
+    MESSAGE = "MESSAGE",
+    ACTION = "ACTION",
 };
