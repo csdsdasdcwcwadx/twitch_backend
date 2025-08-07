@@ -244,6 +244,19 @@ export const websocketClose = (ws: WebSocket) => {
         clientsQueue.delete(ws);
         adminQueue.delete(ws); // admin 斷線也清除
     });
+};
+
+export const getNowTradeDate = () => {
+  const now = new Date();
+
+  const yyyy = now.getFullYear();
+  const MM = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const HH = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+
+  return `${yyyy}/${MM}/${dd} ${HH}:${mm}:${ss}`;
 }
 
 export enum E_WS_Type {

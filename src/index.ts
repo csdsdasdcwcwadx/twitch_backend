@@ -16,8 +16,9 @@ import itemRoutes from './Routers/item';
 import userCheckRoutes from './Routers/userCheck';
 import userItemRoutes from './Routers/userItems';
 import redempRoutes from './Routers/redemption';
+import paymentRoutes from './Routers/payment';
 
-import { authMiddleWare, clientsQueue, webSocketAuth, adminQueue, E_WS_Type, websocketMessage, websocketClose } from "./util";
+import { authMiddleWare, webSocketAuth, websocketMessage, websocketClose } from "./util";
 import { I_Users } from "./Models/user";
 import { initializeDataBase } from './migration';
 
@@ -58,26 +59,6 @@ wss.on('connection', (ws, request) => {
   websocketClose(ws);
 });
 
-app.post("/payment/testing", (req: Request, res: Response) => {
-  const data = req.body;
-  console.log("收到歐付寶通知：", data);
-  res.send("result");
-});
-
-app.get('/payment', (req: Request, res: Response) => {
-  const base_param = {
-    MerchantTradeNo: 'f0a0d7e9fae1bb72b555', //請帶20碼uid, ex: f0a0d7e9fae1bb72bc93
-    MerchantTradeDate: '2017/02/13 15:45:30', //ex: 2017/02/13 15:45:30
-    TotalAmount: '100',
-    TradeDesc: '測試交易描述',
-    ItemName: '測試商品等',
-    ReturnURL: 'http://127.0.0.1:4000/payment/testing',
-    OrderResultURL: 'http://127.0.0.1:4000/payment/testing',
-  };
-  const ans = opay.payment_client.aio_check_out_credit_onetime(base_param);
-  res.send(ans);
-});
-
 // 圖片路徑
 app.use('/item/images', express.static(path.join(__dirname, 'Images')));
 
@@ -88,6 +69,7 @@ app.use('/item', itemRoutes);
 app.use('/usercheck', userCheckRoutes);
 app.use('/useritem', userItemRoutes);
 app.use('/redemp', redempRoutes);
+app.use('/payment', paymentRoutes);
 
 // 啟動 GraphQL Server 並與 Express 整合
 (async () => {
