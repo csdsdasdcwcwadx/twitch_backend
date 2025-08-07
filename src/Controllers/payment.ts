@@ -1,7 +1,7 @@
 import { getNowTradeDate } from "../util";
 import { Request, Response } from 'express';
 
-const opay_payment = require("../opay_payment_nodejs/lib/opay_payment.js");
+const opay_payment = require("../opay_payment_nodejs/index.js");
 const opay = new opay_payment();
 
 const createOrder = (req: Request, res: Response) => {
