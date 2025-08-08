@@ -18,12 +18,29 @@ interface I_OpayResponse {
     TradeDate: string;
     TradeNo: string;
     CheckMacValue: string;
-}
-
-const opay_payment = require("../opay_payment_nodejs/index.js");
+};
+type I_PaymentType = "ecpay" | "opay";
 const ecpay_payment = require("ecpay_aio_nodejs");
 
-const opay = new opay_payment();
+const URL_MAP = {
+    dev: {
+        ecpay: 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5',
+        opay: 'https://payment-stage.opay.tw/Cashier/AioCheckOut/V4',
+    },
+    prod: {
+        ecpay: 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5',
+        opay: 'https://payment.opay.tw/Cashier/AioCheckOut/V4',
+    },
+};
+
+function replaceEcpayFormActionUrl(formHtml: string, type: I_PaymentType): string {
+    const env = process.env.ENV === "prod" ? "prod" : "dev";
+    const urls = URL_MAP[env];
+
+    return formHtml.replace(urls.ecpay, urls[type]);
+}
+
+// const opay = new opay_payment(options);
 const ecpay = new ecpay_payment({
     IgnorePayment: [],
     OperationMode: process.env.ENV === "dev" ? "Test" : "Production",
@@ -52,19 +69,14 @@ const createOrder = async (req: Request, res: Response) => {
         TotalAmount: amount || '1000',
         TradeDesc: '粉絲抖內',
         ItemName: name || '金幣 1000 顆',
-        ReturnURL: `${process.env.ENV === "prod" ? fullUrl : "https://04a491af4a60.ngrok-free.app"}/payment/paymentresult?userid=${req.userinfo.id}`, // 需要是公開的網段 (不能是localhost)
+        ReturnURL: `${process.env.ENV === "prod" ? `${fullUrl}?userid=${req.userinfo.id}` : "https://04a491af4a60.ngrok-free.app"}/payment/paymentresult?userid=${req.userinfo.id}`, // 需要是公開的網段 (不能是localhost)
         ClientBackURL: process.env.APP_HOST,
         ChoosePayment: 'ALL',
         EncryptType: 1,
         PaymentType: "aio" //
     };
-    if (type === "ecpay") {
-        const formHtml = ecpay.payment_client.aio_check_out_all(base_param);
-        res.send(formHtml);
-    } else {
-        const formHtml = opay.payment_client.aio_check_out_all(base_param);
-        res.send(formHtml);
-    }
+    const formHtml = ecpay.payment_client.aio_check_out_all(base_param);
+    res.send(replaceEcpayFormActionUrl(formHtml, type));
 }
 
 const paymentResult = async (req: Request, res: Response) => {
