@@ -22,10 +22,6 @@ import { authMiddleWare, webSocketAuth, websocketMessage, websocketClose } from 
 import { I_Users } from "./Models/user";
 import { initializeDataBase } from './migration';
 
-
-const opay_payment = require("../../Payment_Node.js-master/opay_payment_nodejs/lib/opay_payment.js");
-const opay = new opay_payment();
-
 declare global {
   namespace Express {
     interface Request {

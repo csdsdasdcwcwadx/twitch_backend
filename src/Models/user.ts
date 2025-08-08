@@ -162,4 +162,24 @@ export class Users implements I_Users {
             })
         })
     }
+
+    setGaming() {
+        return new Promise((resolve, reject) => {
+            const SQL = 'UPDATE Users SET isGaming = ? WHERE userid = ?';
+            const errorReturn = {
+                status: false,
+                message: '設定遊戲失敗',
+            };
+            db.query(SQL, [this.id, this.isGaming], (err, result) => {
+                if (err) reject(errorReturn);
+                else {
+                    const successReturn = {
+                        status: true,
+                        message: '設定遊戲成功',
+                    }
+                    resolve(successReturn)
+                }
+            })
+        })
+    }
 }

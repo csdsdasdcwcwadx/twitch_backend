@@ -30,15 +30,18 @@ export const adminRoutes = [
     // redemption
     '/redemp/update',
 ];
-
 export const frontPages = ['/check', '/game', '/pack', '/exchange'];
+export const ignoreRoutes = [
+    '/member/login',
+    '/payment/paymentresult',
+];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
     console.log(`[API] ${req.method} ${req.path}`);
 
     const accessToken: string = req.cookies.access;
     const refreshToken: string = req.cookies.refresh;
-    if (req.path === '/member/login') {
+    if (ignoreRoutes.includes(req.path)) {
         next();
         return;
     }
@@ -237,7 +240,7 @@ export const websocketMessage = (ws: WebSocket) => {
             }
         }
     })
-}
+};
 
 export const websocketClose = (ws: WebSocket) => {
     ws.on('close', () => {
@@ -257,7 +260,7 @@ export const getNowTradeDate = () => {
   const ss = String(now.getSeconds()).padStart(2, '0');
 
   return `${yyyy}/${MM}/${dd} ${HH}:${mm}:${ss}`;
-}
+};
 
 export enum E_WS_Type {
     MESSAGE = "MESSAGE",

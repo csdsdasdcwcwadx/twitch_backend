@@ -15,8 +15,10 @@ class APIHelper {
     constructor(){
         this.cont = fs.readFileSync(__dirname + '/../../conf/payment_conf.xml').toString();
         this.cont_xml = et.parse(this.cont);
-        this.active_merc_info = this.cont_xml.findtext('./MercProfile');
-        this.op_mode = this.cont_xml.findtext('./OperatingMode');
+        // this.active_merc_info = this.cont_xml.findtext('./MercProfile');
+        // this.op_mode = this.cont_xml.findtext('./OperatingMode');
+        this.active_merc_info = process.env.ENV === "dev" ? "Stage_Account" : "Production_Account";
+        this.op_mode = process.env.ENV === "dev" ? "Test" : "Production";
         this.contractor_stat = this.cont_xml.findtext('./IsProjectContractor');
         this.merc_info = this.cont_xml.findall(`./MerchantInfo/MInfo/[@name="${this.active_merc_info}"]`);
         this.ignore_payment = [];
@@ -233,4 +235,4 @@ class APIHelper {
 
 }
 module.exports = APIHelper;
-let test = new APIHelper();
+// let test = new APIHelper();
