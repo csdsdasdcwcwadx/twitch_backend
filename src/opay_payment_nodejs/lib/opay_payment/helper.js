@@ -20,19 +20,22 @@ class APIHelper {
         this.active_merc_info = process.env.ENV === "dev" ? "Stage_Account" : "Production_Account";
         this.op_mode = process.env.ENV === "dev" ? "Test" : "Production";
         this.contractor_stat = this.cont_xml.findtext('./IsProjectContractor');
-        this.merc_info = this.cont_xml.findall(`./MerchantInfo/MInfo/[@name="${this.active_merc_info}"]`);
+        // this.merc_info = this.cont_xml.findall(`./MerchantInfo/MInfo/[@name="${this.active_merc_info}"]`);
         this.ignore_payment = [];
         this.ignore_info = this.cont_xml.findall('./IgnorePayment//Method');
         for(let t = 0, l = this.ignore_info.length; t < l; t++) {
             this.ignore_payment.push(this.ignore_info[t].text);
         }
-        if (this.merc_info !== []) {
-            this.merc_id = this.merc_info[0].findtext('./MerchantID');
-            this.hkey = this.merc_info[0].findtext('./HashKey');
-            this.hiv = this.merc_info[0].findtext('./HashIV');
-        } else {
-            throw new Error(`Specified merchant setting name (${this.active_merc_info}) not found.`);
-        }
+        this.merc_id = process.env.MERCHANT_ID;
+        this.hiv = process.env.HASHIV;
+        this.hkey = process.env.HASHKEY;
+        // if (this.merc_info !== []) {
+        //     this.merc_id = this.merc_info[0].findtext('./MerchantID');
+        //     this.hkey = this.merc_info[0].findtext('./HashKey');
+        //     this.hiv = this.merc_info[0].findtext('./HashIV');
+        // } else {
+        //     throw new Error(`Specified merchant setting name (${this.active_merc_info}) not found.`);
+        // }
         this.date = new Date();
     }
     get_mercid(){
