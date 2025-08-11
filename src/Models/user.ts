@@ -165,7 +165,7 @@ export class Users implements I_Users {
 
     setGaming() {
         return new Promise((resolve, reject) => {
-            const SQL = 'UPDATE Users SET isGaming = ? WHERE userid = ?';
+            const SQL = 'UPDATE Users SET isGaming = ? WHERE id = ?';
             const errorReturn = {
                 status: false,
                 message: '設定遊戲失敗',
@@ -176,8 +176,8 @@ export class Users implements I_Users {
                     const successReturn = {
                         status: true,
                         message: '設定遊戲成功',
-                    }
-                    resolve(successReturn)
+                    };
+                    resolve(successReturn);
                 }
             })
         })

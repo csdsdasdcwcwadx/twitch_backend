@@ -10,8 +10,9 @@ import WebSocket, { WebSocketServer } from 'ws';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
-export const clientsQueue = new Set<WebSocket>();
-export const adminQueue = new Set<WebSocket>();
+
+const clientsQueue = new Set<WebSocket>();
+const adminQueue = new Set<WebSocket>();
 const alertClients = new Set<WebSocket>();
 
 export const accessTime = '15m';
@@ -264,8 +265,8 @@ export const getNowTradeDate = () => {
   return `${yyyy}/${MM}/${dd} ${HH}:${mm}:${ss}`;
 };
 
-export function broadcastAlert(data: I_AlertMessage) {
-    const jsonData = JSON.stringify(data);
+export function broadcastAlert() {
+    const jsonData = JSON.stringify(donate);
     alertClients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(jsonData);
@@ -298,6 +299,18 @@ export const initWebSockets = (server: Server) => {
     });
 };
 
+export const donate = {
+    DonateNickName: "",
+    DonateAmount: "",
+    DonateMsg: "",
+};
+
+export function setDonate(donateValue: I_AlertMessage) {
+    donate.DonateNickName = donateValue.DonateNickName;
+    donate.DonateAmount = donateValue.DonateAmount;
+    donate.DonateMsg = donateValue.DonateMsg;
+};
+
 export enum E_WS_Type {
     MESSAGE = "MESSAGE",
     ACTION = "ACTION",
@@ -307,4 +320,4 @@ export interface I_AlertMessage {
     DonateNickName: string;
     DonateAmount: string;
     DonateMsg: string;
-}
+};

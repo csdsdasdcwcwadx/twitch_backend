@@ -2,7 +2,7 @@ import { getNowTradeDate } from "../util";
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { Users } from "../Models/user";
-import { broadcastAlert } from "../util";
+import { broadcastAlert, setDonate, donate } from "../util";
 
 interface I_OpayResponse {
     MerchantID: string;
@@ -53,30 +53,47 @@ const ecpay = new ecpay_payment({
 });
 
 const createOrder = async (req: Request, res: Response) => {
-    const { name, amount, type } = req.body;
+    const { name, amount, type, backURL, message } = req.body;
 
     // handle uuid
     const uuid = uuidv4().replace(/-/g, ''); // 拿掉破折號
     const shortId = uuid.slice(0, 20);
+    setDonate({
+        DonateNickName: name,
+        DonateAmount: amount,
+        DonateMsg: message,
+    });
 
     // handle protocol
     const fullUrl = req.protocol + "://" + req.get('host');
 
-    const base_param = {
-        MerchantID: process.env.MERCHANT_ID, //
-        MerchantTradeNo: shortId,
-        MerchantTradeDate: getNowTradeDate(),
-        TotalAmount: amount || '1000',
-        TradeDesc: '粉絲抖內',
-        ItemName: name || '金幣 1000 顆',
-        ReturnURL: `${process.env.ENV === "prod" ? `${fullUrl}/payment/paymentresult?userid=${req.userinfo.id}` : "https://749eec3d9681.ngrok-free.app"}/payment/paymentresult?userid=${req.userinfo.id}`, // 需要是公開的網段 (不能是localhost)
-        ClientBackURL: process.env.APP_HOST,
-        ChoosePayment: 'ALL',
-        EncryptType: 1,
-        PaymentType: "aio" //
-    };
-    const formHtml = ecpay.payment_client.aio_check_out_all(base_param);
-    res.send(replaceEcpayFormActionUrl(formHtml, type));
+    try {
+        const base_param = {
+            MerchantID: process.env.MERCHANT_ID, //
+            MerchantTradeNo: shortId,
+            MerchantTradeDate: getNowTradeDate(),
+            TotalAmount: amount,
+            TradeDesc: '粉絲抖內',
+            ItemName: name,
+            ReturnURL: `${process.env.ENV === "prod" ? `${fullUrl}/payment/paymentresult?userid=${req.userinfo.id}` : "https://4fe23be226e6.ngrok-free.app"}/payment/paymentresult?userid=${req.userinfo.id}`, // 需要是公開的網段 (不能是localhost)
+            ClientBackURL: backURL,
+            ChoosePayment: 'ALL',
+            EncryptType: 1,
+            PaymentType: "aio" //
+        };
+        const formHtml = ecpay.payment_client.aio_check_out_all(base_param);
+        res.send(replaceEcpayFormActionUrl(formHtml, type));
+    } catch (e) {
+        setDonate({
+            DonateNickName: "",
+            DonateAmount: "",
+            DonateMsg: "",
+        });
+        res.json({
+            status: false,
+            message: "建立訂單失敗",
+        });
+    }
 }
 
 const paymentResult = async (req: Request, res: Response) => {
@@ -90,14 +107,20 @@ const paymentResult = async (req: Request, res: Response) => {
             message: "交易失敗",
         }
         const userModel = new Users(userId, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, true);
-        broadcastAlert({
-            DonateNickName: 'nickname',
-            DonateAmount: data.TradeAmt,
-            DonateMsg: 'donate_message',
+        broadcastAlert();
+        setDonate({
+            DonateNickName: "",
+            DonateAmount: "",
+            DonateMsg: "",
         });
         const result = await userModel.setGaming();
         res.json(result);
     } catch (e) {
+        setDonate({
+            DonateNickName: "",
+            DonateAmount: "",
+            DonateMsg: "",
+        });
         res.json(e);
     }
 }
