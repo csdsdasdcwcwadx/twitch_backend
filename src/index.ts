@@ -18,7 +18,7 @@ import userItemRoutes from './Routers/userItems';
 import redempRoutes from './Routers/redemption';
 import paymentRoutes from './Routers/payment';
 
-import { authMiddleWare, webSocketAuth, websocketMessage, websocketClose } from "./util";
+import { authMiddleWare, initWebSockets } from "./util";
 import { I_Users } from "./Models/user";
 import { initializeDataBase } from './migration';
 
@@ -40,20 +40,13 @@ const apolloServer = new ApolloServer({
 
 const app = express();
 const server = createServer(app); // 用 http 包 Express
-const wss = new WebSocketServer({ server }); // 啟動 WebSocket Server
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(authMiddleWare);
 
-wss.on('connection', (ws, request) => {
-   const userinfo = webSocketAuth(ws, request);
-   if (!userinfo) return;
-
-  websocketMessage(ws);
-  websocketClose(ws);
-});
+initWebSockets(server);
 
 // 圖片路徑
 app.use('/item/images', express.static(path.join(__dirname, 'Images')));

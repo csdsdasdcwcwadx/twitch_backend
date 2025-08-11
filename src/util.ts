@@ -4,14 +4,15 @@ import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { I_Users, Users } from './Models/user';
-import WebSocket from 'ws';
-import { IncomingMessage } from 'http';
+import { IncomingMessage, Server } from 'http';
 import * as cookie from 'cookie';
+import WebSocket, { WebSocketServer } from 'ws';
 
 export const ACCESS_SECRET_KEY = uuidv4();
 export const REFRESH_SECRET_KEY = uuidv4();
 export const clientsQueue = new Set<WebSocket>();
 export const adminQueue = new Set<WebSocket>();
+const alertClients = new Set<WebSocket>();
 
 export const accessTime = '15m';
 export const refreshTime = '10h';
@@ -34,6 +35,7 @@ export const frontPages = ['/check', '/game', '/pack', '/exchange'];
 export const ignoreRoutes = [
     '/member/login',
     '/payment/paymentresult',
+    '/alert',
 ];
  
 export const authMiddleWare = async (req: Request, res: Response, next: Function) => {
@@ -262,7 +264,47 @@ export const getNowTradeDate = () => {
   return `${yyyy}/${MM}/${dd} ${HH}:${mm}:${ss}`;
 };
 
+export function broadcastAlert(data: I_AlertMessage) {
+    const jsonData = JSON.stringify(data);
+    alertClients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(jsonData);
+        }
+    });
+};
+
+export const initWebSockets = (server: Server) => {
+    const wss = new WebSocketServer({ server });
+
+    wss.on("connection", (ws, request) => {
+        const url = request.url;
+
+        if (url === "/socket/game") {
+            console.log("有人連上 /socket/game");
+            const userinfo = webSocketAuth(ws, request);
+            if (!userinfo) return;
+
+            websocketMessage(ws);
+            websocketClose(ws);
+        } else if (url === "/socket/alert") {
+            console.log("有人連上 /socket/alert");
+            alertClients.add(ws);
+            ws.on("close", () => {
+                alertClients.delete(ws);
+            });
+        } else {
+            ws.close(1008, "Unknown path");
+        }
+    });
+};
+
 export enum E_WS_Type {
     MESSAGE = "MESSAGE",
     ACTION = "ACTION",
 };
+
+export interface I_AlertMessage {
+    DonateNickName: string;
+    DonateAmount: string;
+    DonateMsg: string;
+}

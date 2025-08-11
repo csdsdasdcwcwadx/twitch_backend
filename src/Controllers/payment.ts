@@ -2,6 +2,7 @@ import { getNowTradeDate } from "../util";
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { Users } from "../Models/user";
+import { broadcastAlert } from "../util";
 
 interface I_OpayResponse {
     MerchantID: string;
@@ -25,11 +26,11 @@ const ecpay_payment = require("ecpay_aio_nodejs");
 const URL_MAP = {
     dev: {
         ecpay: 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5',
-        opay: 'https://payment-stage.opay.tw/Cashier/AioCheckOut/V4',
+        opay: 'https://payment-stage.opay.tw/Cashier/AioCheckOut/V5',
     },
     prod: {
         ecpay: 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5',
-        opay: 'https://payment.opay.tw/Cashier/AioCheckOut/V4',
+        opay: 'https://payment.opay.tw/Cashier/AioCheckOut/V5',
     },
 };
 
@@ -40,9 +41,8 @@ function replaceEcpayFormActionUrl(formHtml: string, type: I_PaymentType): strin
     return formHtml.replace(urls.ecpay, urls[type]);
 }
 
-// const opay = new opay_payment(options);
 const ecpay = new ecpay_payment({
-    IgnorePayment: [],
+    IgnorePayment: [], // Alipay#TWQR#BARCODE#Tenpay#IBON#CreditInstallment
     OperationMode: process.env.ENV === "dev" ? "Test" : "Production",
     IsProjectContractor: "N",
     MercProfile: {
@@ -69,7 +69,7 @@ const createOrder = async (req: Request, res: Response) => {
         TotalAmount: amount || '1000',
         TradeDesc: '粉絲抖內',
         ItemName: name || '金幣 1000 顆',
-        ReturnURL: `${process.env.ENV === "prod" ? `${fullUrl}?userid=${req.userinfo.id}` : "https://04a491af4a60.ngrok-free.app"}/payment/paymentresult?userid=${req.userinfo.id}`, // 需要是公開的網段 (不能是localhost)
+        ReturnURL: `${process.env.ENV === "prod" ? `${fullUrl}/payment/paymentresult?userid=${req.userinfo.id}` : "https://749eec3d9681.ngrok-free.app"}/payment/paymentresult?userid=${req.userinfo.id}`, // 需要是公開的網段 (不能是localhost)
         ClientBackURL: process.env.APP_HOST,
         ChoosePayment: 'ALL',
         EncryptType: 1,
@@ -90,6 +90,11 @@ const paymentResult = async (req: Request, res: Response) => {
             message: "交易失敗",
         }
         const userModel = new Users(userId, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, true);
+        broadcastAlert({
+            DonateNickName: 'nickname',
+            DonateAmount: data.TradeAmt,
+            DonateMsg: 'donate_message',
+        });
         const result = await userModel.setGaming();
         res.json(result);
     } catch (e) {

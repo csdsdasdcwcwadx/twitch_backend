@@ -170,7 +170,7 @@ export class Users implements I_Users {
                 status: false,
                 message: '設定遊戲失敗',
             };
-            db.query(SQL, [this.id, this.isGaming], (err, result) => {
+            db.query(SQL, [this.isGaming, this.id], (err, result) => {
                 if (err) reject(errorReturn);
                 else {
                     const successReturn = {
