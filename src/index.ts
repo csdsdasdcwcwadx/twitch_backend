@@ -1,6 +1,6 @@
 import typeDefs from "./typeDefs";
 import resolvers from "./resolvers";
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import bodyParser from 'body-parser';
@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
+import { initSocketIO } from "./websocket";
 
 import memberRoutes from './Routers/user';
 import checkRoutes from './Routers/check';
@@ -18,7 +18,7 @@ import userItemRoutes from './Routers/userItems';
 import redempRoutes from './Routers/redemption';
 import paymentRoutes from './Routers/payment';
 
-import { authMiddleWare, initWebSockets } from "./util";
+import { authMiddleWare } from "./util";
 import { I_Users } from "./Models/user";
 import { initializeDataBase } from './migration';
 
@@ -46,7 +46,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(authMiddleWare);
 
-initWebSockets(server);
+initSocketIO(server);
 
 // 圖片路徑
 app.use('/item/images', express.static(path.join(__dirname, 'Images')));

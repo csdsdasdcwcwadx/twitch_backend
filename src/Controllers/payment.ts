@@ -1,8 +1,8 @@
-import { getNowTradeDate } from "../util";
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { Users } from "../Models/user";
-import { broadcastAlert, setDonate, donate } from "../util";
+import { broadcastAlert } from '../websocket';
+
 
 interface I_OpayResponse {
     MerchantID: string;
@@ -41,6 +41,19 @@ function replaceEcpayFormActionUrl(formHtml: string, type: I_PaymentType): strin
     return formHtml.replace(urls.ecpay, urls[type]);
 }
 
+const getNowTradeDate = () => {
+    const now = new Date();
+
+    const yyyy = now.getFullYear();
+    const MM = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const HH = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+
+    return `${yyyy}/${MM}/${dd} ${HH}:${mm}:${ss}`;
+};
+
 const ecpay = new ecpay_payment({
     IgnorePayment: [], // Alipay#TWQR#BARCODE#Tenpay#IBON#CreditInstallment
     OperationMode: process.env.ENV === "dev" ? "Test" : "Production",
@@ -58,11 +71,11 @@ const createOrder = async (req: Request, res: Response) => {
     // handle uuid
     const uuid = uuidv4().replace(/-/g, ''); // 拿掉破折號
     const shortId = uuid.slice(0, 20);
-    setDonate({
-        DonateNickName: name,
-        DonateAmount: amount,
-        DonateMsg: message,
-    });
+    // setDonate({
+    //     DonateNickName: name,
+    //     DonateAmount: amount,
+    //     DonateMsg: message,
+    // });
 
     // handle protocol
     const fullUrl = req.protocol + "://" + req.get('host');
@@ -75,7 +88,7 @@ const createOrder = async (req: Request, res: Response) => {
             TotalAmount: amount,
             TradeDesc: '粉絲抖內',
             ItemName: name,
-            ReturnURL: `${process.env.ENV === "prod" ? `${fullUrl}/payment/paymentresult?userid=${req.userinfo.id}` : "https://4fe23be226e6.ngrok-free.app"}/payment/paymentresult?userid=${req.userinfo.id}`, // 需要是公開的網段 (不能是localhost)
+            ReturnURL: `${process.env.ENV === "prod" ? `${fullUrl}/payment/paymentresult?userid=${req.userinfo.id}` : "https://e0519b9b170d.ngrok-free.app"}/payment/paymentresult?userid=${req.userinfo.id}`, // 需要是公開的網段 (不能是localhost)
             ClientBackURL: backURL,
             ChoosePayment: 'ALL',
             EncryptType: 1,
@@ -84,11 +97,6 @@ const createOrder = async (req: Request, res: Response) => {
         const formHtml = ecpay.payment_client.aio_check_out_all(base_param);
         res.send(replaceEcpayFormActionUrl(formHtml, type));
     } catch (e) {
-        setDonate({
-            DonateNickName: "",
-            DonateAmount: "",
-            DonateMsg: "",
-        });
         res.json({
             status: false,
             message: "建立訂單失敗",
@@ -99,7 +107,7 @@ const createOrder = async (req: Request, res: Response) => {
 const paymentResult = async (req: Request, res: Response) => {
     const data = req.body as I_OpayResponse;
     const userId = req.query.userid as string;
-    console.log(data)
+    // console.log(data)
 
     try {
         if (data.RtnCode !== '1') throw {
@@ -107,20 +115,14 @@ const paymentResult = async (req: Request, res: Response) => {
             message: "交易失敗",
         }
         const userModel = new Users(userId, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, true);
-        broadcastAlert();
-        setDonate({
-            DonateNickName: "",
-            DonateAmount: "",
-            DonateMsg: "",
+        broadcastAlert({
+            DonateNickName: "name",
+            DonateAmount: "amount",
+            DonateMsg: "message",
         });
         const result = await userModel.setGaming();
         res.json(result);
     } catch (e) {
-        setDonate({
-            DonateNickName: "",
-            DonateAmount: "",
-            DonateMsg: "",
-        });
         res.json(e);
     }
 }
