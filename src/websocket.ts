@@ -1,7 +1,7 @@
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { Server } from 'http';
 import jwt from "jsonwebtoken";
-import cookie from "cookie";
+import * as cookie from 'cookie';
 import { ACCESS_SECRET_KEY, I_AlertMessage } from "./util";
 
 let io: SocketIOServer | null = null;
