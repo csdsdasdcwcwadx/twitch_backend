@@ -73,6 +73,7 @@ export class Users implements I_Users {
             const id = uuidv4().substring(0, 12);
             const post: Partial<I_Users> = {};
 
+            if (this.twitch_id !== undefined) post.twitch_id = this.twitch_id;
             if (this.login !== undefined) post.login = this.login;
             if (this.name !== undefined) post.name = this.name;
             if (this.email !== undefined) post.email = this.email;
@@ -92,7 +93,6 @@ export class Users implements I_Users {
             };
             const SQL = 'SELECT * FROM Users WHERE twitch_id = ?';
             db.query(SQL, this.twitch_id, (err, result: RowDataPacket[]) => {
-                console.error(err)
                 if (err) reject(errorReturn);
                 else {
                     if (result.length) {
@@ -100,7 +100,6 @@ export class Users implements I_Users {
                         const SQL = 'UPDATE Users SET ? WHERE id = ?';
                         
                         db.query(SQL, [post, result[0].id], (err, _result) => {
-                            console.error(err)
                             if(err) reject(errorReturn);
                             else {
                                 successReturn.userinfo = result as [I_Users];
@@ -112,7 +111,6 @@ export class Users implements I_Users {
                         const SQL = 'INSERT INTO Users SET ?';
                         post.id = id;
                         db.query(SQL, post, (err, _result) => {
-                            console.error(err)
                             if(err) reject(errorReturn);
                             else resolve(successReturn);
                         })
