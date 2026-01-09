@@ -29,9 +29,13 @@ const URL_MAP = {
         opay: 'https://payment-stage.opay.tw/Cashier/AioCheckOut/V5',
     },
     prod: {
-        ecpay: 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5',
-        opay: 'https://payment.opay.tw/Cashier/AioCheckOut/V5',
+        ecpay: 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5',
+        opay: 'https://payment-stage.opay.tw/Cashier/AioCheckOut/V5',
     },
+    // prod: {
+    //     ecpay: 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5',
+    //     opay: 'https://payment.opay.tw/Cashier/AioCheckOut/V5',
+    // },
 };
 
 function replaceEcpayFormActionUrl(formHtml: string, type: I_PaymentType): string {
