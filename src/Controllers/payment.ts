@@ -60,7 +60,8 @@ const getNowTradeDate = () => {
 
 const ecpay = new ecpay_payment({
     IgnorePayment: [], // Alipay#TWQR#BARCODE#Tenpay#IBON#CreditInstallment
-    OperationMode: process.env.ENV === "dev" ? "Test" : "Production",
+    // OperationMode: process.env.ENV === "dev" ? "Test" : "Production",
+    OperationMode: "Test",
     IsProjectContractor: "N",
     MercProfile: {
         MerchantID: process.env.MERCHANT_ID,
