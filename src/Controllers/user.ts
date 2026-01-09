@@ -71,7 +71,6 @@ const login = async (req: Request, res: Response) => {
         }
 
     } catch (e) {
-        console.error(e);
         res.status(500).send("登入失敗");
     }
 }
