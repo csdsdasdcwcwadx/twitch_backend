@@ -71,6 +71,7 @@ const login = async (req: Request, res: Response) => {
         }
 
     } catch (e) {
+        console.error(e);
         res.status(500).send("登入失敗");
     }
 }
@@ -105,7 +106,6 @@ const logout = async (req: Request, res: Response) => {
         res.json({
             status: false,
             message: "登出失敗",
-            reason: e,
         })
     }
 }
