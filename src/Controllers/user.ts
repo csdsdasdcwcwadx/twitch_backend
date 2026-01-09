@@ -105,6 +105,7 @@ const logout = async (req: Request, res: Response) => {
         res.json({
             status: false,
             message: "登出失敗",
+            reason: e,
         })
     }
 }

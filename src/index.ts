@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { createServer } from 'http';
 import { initSocketIO } from "./websocket";
+import cors from 'cors';
 
 import memberRoutes from './Routers/user';
 import checkRoutes from './Routers/check';
@@ -41,6 +42,14 @@ const apolloServer = new ApolloServer({
 const app = express();
 const server = createServer(app); // 用 http 包 Express
 
+app.use(cors({
+  origin: [
+    'https://anguprojecy.site',
+    'https://www.anguprojecy.site'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
